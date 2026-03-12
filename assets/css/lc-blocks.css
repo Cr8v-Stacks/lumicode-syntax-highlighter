@@ -1,0 +1,434 @@
+/* =============================================================
+   LumiCode — Frontend Code Block v1.5.2
+   Cr8v Stacks · cr8vstacks.com
+   ============================================================= */
+
+/* ── Block wrapper ───────────────────────────────────────── */
+.lc-pw {
+    position: relative;
+    margin: 1.8em 0 3.8em 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #2a2d3a;
+    box-shadow:
+        0 0 0 0.5px rgba(255,255,255,0.04) inset,
+        0 16px 48px rgba(0,0,0,0.5),
+        0 4px 12px rgba(0,0,0,0.3);
+    transition: border-color 0.2s;
+    font-family: 'JetBrains Mono','Fira Code','Menlo','Monaco',ui-monospace,monospace;
+}
+.lc-pw-is-light {
+    border-color: rgba(0,0,0,0.12) !important;
+    box-shadow:
+        0 0 0 1px rgba(0,0,0,0.07),
+        0 4px 16px rgba(0,0,0,0.07),
+        0 12px 32px rgba(0,0,0,0.05) !important;
+}
+
+/* ── Titlebar ────────────────────────────────────────────── */
+.lc-pw-titlebar {
+    height: 44px;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 16px !important;
+    gap: 8px !important;
+    background: #1c1e28 !important;
+    border-bottom: 1px solid #2a2d3a !important;
+    position: relative !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+}
+.lc-pw-is-light .lc-pw-titlebar {
+    background: #f0f1f7 !important;
+    border-bottom-color: rgba(0,0,0,0.09) !important;
+}
+
+/* Traffic-light dots */
+.lc-pw-dots {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+}
+.lc-pw-dot {
+    display: block !important;
+    width: 12px !important; height: 12px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+    cursor: default !important;
+}
+.lc-pw-dot--red    { background: #ff5f57 !important; }
+.lc-pw-dot--yellow { background: #febc2e !important; }
+.lc-pw-dot--green  { background: #28c840 !important; }
+
+/* Filename */
+.lc-pw-filename {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    top: 0 !important; height: 100% !important;
+    display: flex !important; align-items: center !important; gap: 6px !important;
+    font-family: 'Sora',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif !important;
+    font-size: 13px !important; font-weight: 400 !important;
+    color: #6c7086 !important;
+    letter-spacing: 0.01em !important;
+    pointer-events: none !important;
+    white-space: nowrap !important; overflow: hidden !important; max-width: 40% !important;
+}
+.lc-pw-is-light .lc-pw-filename { color: rgba(0,0,0,0.42) !important; }
+
+.lc-pw-dot-indicator {
+    display: block !important; width: 6px !important; height: 6px !important;
+    border-radius: 50% !important; background: #febc2e !important;
+    opacity: 0.8 !important; flex-shrink: 0 !important;
+}
+
+/* ── Copy button ─────────────────────────────────────────── */
+.lc-pw-copybtn {
+    margin-left: auto !important;
+    display: inline-flex !important; align-items: center !important; gap: 5px !important;
+    padding: 4px 10px !important;
+    background: none !important;
+    border: 1px solid #6c7086 !important;
+    border-radius: 5px !important;
+    color: #6c7086 !important;
+    font-family: 'Sora',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif !important;
+    font-size: 11px !important; font-weight: 400 !important;
+    letter-spacing: 0.04em !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    transition: all 0.15s !important;
+    flex-shrink: 0 !important;
+    position: relative !important; z-index: 1 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+.lc-pw-copybtn:hover {
+    background: rgba(255,255,255,0.08) !important;
+    color: #cdd6f4 !important;
+    border-color: rgba(255,255,255,0.3) !important;
+}
+.lc-pw-copybtn:active { transform: scale(0.95) !important; }
+.lc-pw-is-light .lc-pw-copybtn {
+    border-color: rgba(0,0,0,0.28) !important;
+    color: rgba(0,0,0,0.48) !important;
+}
+.lc-pw-is-light .lc-pw-copybtn:hover {
+    background: rgba(0,0,0,0.05) !important;
+    color: rgba(0,0,0,0.75) !important;
+    border-color: rgba(0,0,0,0.45) !important;
+}
+
+/* ── Code area ───────────────────────────────────────────── */
+/*
+ * LINE HEIGHT = 1.5 (standard for code editors, Prism uses 1.5, VS Code default is ~1.5)
+ * Padding on <code> only: 20px top/bottom.  <pre> has NO padding.
+ * Gutter padding must exactly match code padding.
+ * line-height must be identical in gutter and code.
+ */
+.lc-pw-code { overflow-x: auto !important; overflow-y: visible !important; }
+
+.lc-pw-code pre {
+    margin: 0 !important;
+    border: none !important; border-radius: 0 !important; box-shadow: none !important;
+    background: #161820 !important;
+    font-family: 'JetBrains Mono','Fira Code',ui-monospace,monospace !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;          /* Standard code line height */
+    overflow: visible !important;
+    display: block !important;
+    padding: 0 !important;                /* NO padding on pre */
+    text-shadow: none !important;
+}
+.lc-pw-is-light .lc-pw-code pre { background: #f7f7fb !important; }
+.lc-pw-code pre:has(code.hljs)  { background: transparent !important; }
+
+/* All padding lives on <code> */
+.lc-pw-code pre code {
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    display: block !important;
+    white-space: pre !important;
+    min-width: max-content !important;
+    padding: 20px 24px !important;        /* 20px top/bottom — must match gutter */
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+/* ── Status bar ──────────────────────────────────────────── */
+.lc-pw-statusbar {
+    height: 30px !important;
+    display: flex !important; align-items: center !important;
+    padding: 0 16px !important; gap: 20px !important;
+    background: #1c1e28 !important;
+    border-top: 1px solid #2a2d3a !important;
+    user-select: none !important; -webkit-user-select: none !important;
+    flex-shrink: 0 !important;
+}
+.lc-pw-is-light .lc-pw-statusbar {
+    background: #f0f1f7 !important;
+    border-top-color: rgba(0,0,0,0.09) !important;
+}
+
+.lc-pw-status-left { display: flex !important; gap: 20px !important; }
+.lc-pw-status-left span,
+.lc-pw-status-right {
+    font-family: 'Sora',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif !important;
+    font-size: 11px !important;
+    color: #6c7086 !important;
+    letter-spacing: 0.03em !important;
+    line-height: 1 !important;
+}
+.lc-pw-status-right {
+    margin-left: auto !important;
+    color: #cba6f7 !important;
+    font-weight: 500 !important;
+}
+.lc-pw-is-light .lc-pw-status-left span { color: rgba(0,0,0,0.38) !important; }
+.lc-pw-is-light .lc-pw-status-right     { color: #7c3aed !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   COLLAPSE SYSTEM
+   ─────────────────────────────────────────────────────────
+   Collapsed:
+     .lc-pw-body.is-collapsed  → clips to --lc-clip-h
+       content (lined or code)
+       .lc-expand-overlay      → absolute, gradient + pill
+   
+   Expanded:
+     .lc-pw-body               → no clip
+       content
+       .lc-expand-overlay      → HIDDEN via CSS (not JS timing)
+     .lc-collapse-bar.is-visible → slides in
+   ═══════════════════════════════════════════════════════════ */
+
+.lc-pw-body {
+    position: relative !important;
+    overflow: hidden !important;
+}
+.lc-pw-body.is-collapsed {
+    max-height: var(--lc-clip-h, 400px) !important;
+}
+
+/* Hide overlay with CSS when NOT collapsed — avoids JS timing flash */
+.lc-pw-body:not(.is-collapsed) .lc-expand-overlay {
+    display: none !important;
+}
+
+/* Gradient overlay */
+.lc-expand-overlay {
+    position: absolute !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important;
+    height: 136px !important;
+    display: flex !important; align-items: flex-end !important; justify-content: center !important;
+    padding-bottom: 22px !important;
+    background: linear-gradient(
+        to bottom,
+        rgba(22,24,32,0.00)  0%,
+        rgba(22,24,32,0.50) 28%,
+        rgba(22,24,32,0.88) 60%,
+        rgba(22,24,32,0.98) 100%
+    ) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    pointer-events: all !important;
+    z-index: 2 !important;
+}
+.lc-pw-is-light .lc-expand-overlay {
+    background: linear-gradient(
+        to bottom,
+        rgba(247,247,251,0.00)  0%,
+        rgba(247,247,251,0.55) 28%,
+        rgba(247,247,251,0.92) 60%,
+        rgba(247,247,251,1.00) 100%
+    ) !important;
+}
+
+/* Expand pill button */
+.lc-expand-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 7px 16px !important;
+    background: rgba(22,24,32,0.82) !important;
+    border: 1px solid rgba(255,255,255,0.14) !important;
+    border-radius: 20px !important;
+    color: #cdd6f4 !important;
+    font-family: 'Sora',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.03em !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    transition: background 0.15s, border-color 0.15s !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+.lc-expand-btn:hover {
+    background: rgba(40,42,58,0.95) !important;
+    border-color: rgba(255,255,255,0.25) !important;
+}
+.lc-pw-is-light .lc-expand-btn {
+    background: rgba(255,255,255,0.92) !important;
+    border-color: rgba(0,0,0,0.13) !important;
+    color: #1e1e2e !important;
+}
+.lc-pw-is-light .lc-expand-btn:hover {
+    background: #fff !important;
+    border-color: rgba(0,0,0,0.22) !important;
+    color: #1e1e2e !important;
+}
+
+/* "N lines hidden" badge */
+.lc-expand-count {
+    font-size: 10.5px !important;
+    background: rgba(167,139,250,0.18) !important;
+    color: #a78bfa !important;
+    border-radius: 20px !important;
+    padding: 2px 8px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+}
+.lc-pw-is-light .lc-expand-count {
+    background: rgba(124,58,237,0.10) !important;
+    color: #7c3aed !important;
+}
+
+/* Chevron icon */
+.lc-expand-chevron {
+    display: inline-flex !important;
+    align-items: center !important;
+    color: #a78bfa !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.2s ease !important;
+}
+.lc-pw-is-light .lc-expand-chevron { color: #7c3aed !important; }
+
+/* Collapse bar — slides in after expanding */
+.lc-collapse-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #1a1c26 !important;
+    border-top: 1px solid #2a2d3a !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    padding: 0 !important;           /* start with no padding — included in max-height transition */
+    transition: max-height 0.35s cubic-bezier(0.16,1,0.3,1),
+                opacity 0.25s ease,
+                padding 0.35s cubic-bezier(0.16,1,0.3,1) !important;
+}
+.lc-collapse-bar.is-visible {
+    max-height: 90px !important;     /* large enough for padding + btn */
+    opacity: 1 !important;
+    padding: 30px 0 !important;      /* 30px top + bottom as requested */
+}
+.lc-pw-is-light .lc-collapse-bar {
+    background: #eeeef8 !important;
+    border-top-color: rgba(0,0,0,0.09) !important;
+}
+
+.lc-collapse-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    padding: 10px 20px !important;
+    width: 100% !important;
+    justify-content: center !important;
+    background: none !important;
+    border: none !important;
+    color: #6c7086 !important;
+    font-family: 'Sora',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.03em !important;
+    cursor: pointer !important;
+    transition: color 0.15s !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+.lc-collapse-btn:hover { color: #cdd6f4 !important; }
+.lc-pw-is-light .lc-collapse-btn { color: rgba(0,0,0,0.42) !important; }
+.lc-pw-is-light .lc-collapse-btn:hover { color: rgba(0,0,0,0.75) !important; }
+
+/* ── Line numbers ────────────────────────────────────────── */
+/*
+ * ALIGNMENT RULES (critical — must never change without matching code):
+ * 1. line-height: 1.5  ←→ code pre line-height: 1.5  (IDENTICAL)
+ * 2. padding: 20px 14px ←→ code padding-top: 20px, code padding-bottom: 20px (IDENTICAL)
+ * 3. font-size injected by JS to match cfg.fontSize
+ * 4. align-self: stretch ensures gutter background fills full height
+ * 5. Each span { display: block; line-height: 1.5 } — explicit, not inherited
+ */
+.lc-pw-lined {
+    display: flex !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    align-items: stretch !important;
+}
+
+.lc-pw-line-numbers {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 20px 14px !important;    /* MUST match code padding exactly */
+    min-width: 48px !important;
+    text-align: right !important;
+    user-select: none !important; -webkit-user-select: none !important;
+    color: #45475a !important;
+    font-size: 13px !important;       /* overridden by JS to match cfg.fontSize */
+    line-height: 1.5 !important;      /* MUST match pre line-height */
+    flex-shrink: 0 !important;
+    border-right: 1px solid #2a2d3a !important;
+    background: #161820 !important;
+    font-family: 'JetBrains Mono',ui-monospace,monospace !important;
+    font-weight: 300 !important;
+    align-self: stretch !important;
+    box-sizing: border-box !important;
+    min-height: 100% !important;
+}
+.lc-pw-is-light .lc-pw-line-numbers {
+    color: rgba(0,0,0,0.28) !important;
+    border-right-color: rgba(0,0,0,0.09) !important;
+    background: #eeeef6 !important;
+}
+
+/* Every line-number span must have explicit line-height — no inheritance ambiguity */
+.lc-pw-line-numbers span {
+    display: block !important;
+    line-height: 1.5 !important;
+}
+
+.lc-pw-lined .lc-pw-code {
+    flex: 1 !important;
+    min-width: 0 !important;
+    overflow-x: visible !important;
+}
+.lc-pw-lined .lc-pw-code pre { overflow-x: visible !important; }
+
+/* ── Per-line highlights ─────────────────────────────────── */
+.lc-pw-line { display: block !important; }
+.lc-pw-line--highlighted {
+    background: rgba(255,255,255,0.04) !important;
+    margin-left: -24px !important; padding-left: 24px !important;
+    margin-right: -24px !important; padding-right: 24px !important;
+    display: block !important;
+}
+
+/* ── Scrollbars ──────────────────────────────────────────── */
+.lc-pw-code::-webkit-scrollbar, .lc-pw-lined::-webkit-scrollbar { height: 6px; width: 5px; }
+.lc-pw-code::-webkit-scrollbar-track, .lc-pw-lined::-webkit-scrollbar-track { background: #161820; }
+.lc-pw-code::-webkit-scrollbar-thumb, .lc-pw-lined::-webkit-scrollbar-thumb { background: #2a2d3a; border-radius: 3px; }
+.lc-pw-code::-webkit-scrollbar-thumb:hover, .lc-pw-lined::-webkit-scrollbar-thumb:hover { background: #45475a; }
+.lc-pw-is-light .lc-pw-code::-webkit-scrollbar-track,
+.lc-pw-is-light .lc-pw-lined::-webkit-scrollbar-track { background: #f0f1f7; }
+.lc-pw-is-light .lc-pw-code::-webkit-scrollbar-thumb,
+.lc-pw-is-light .lc-pw-lined::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); }
