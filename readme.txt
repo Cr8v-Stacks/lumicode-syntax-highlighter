@@ -3,8 +3,8 @@ Contributors: cr8vstacks
 Donate link: https://cr8vstacks.com
 Tags: syntax highlighter, code block, highlight.js, code snippet, developer
 Requires at least: 6.0
-Tested up to: 6.7
-Stable tag: 1.5.2
+Tested up to: 6.9
+Stable tag: 1.5.3
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -111,6 +111,11 @@ PHP 8.0 or higher. WordPress 6.0 or higher.
 6. **Code Scanner** — finds bare `<pre>` blocks across your site and lets you apply LumiCode
 
 == Changelog ==
+
+= 1.5.3 =
+* Added frontend recognition for inline code-style elements: `<code>`, `<kbd>`, `<samp>`, and `<var>`.
+* Added inline styling for those elements so examples like `service-row`, `service-row-1`, and similar tokens render clearly in paragraphs and lists.
+* Updated inline code styling to use a transparent background, `#1e40af` text color, and a matching blue border color scheme.
 
 = 1.5.2 =
 * Fix: TinyMCE Insert Code dialog now switches to light mode when admin is in light mode

@@ -3,19 +3,19 @@
  * Plugin Name:       LumiCode – Syntax Highlighter
  * Plugin URI:        https://cr8vstacks.com/lumicode
  * Description:       Beautiful syntax highlighting with auto-detection, copy buttons, line numbers, and a safe scanner.
- * Version:           1.5.2
+ * Version:           1.5.3
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            Cr8v Stacks
  * Author URI:        https://cr8vstacks.com
  * License:           GPL-2.0+
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       lumicode
+ * Text Domain:       lumicode-syntax-highlighter
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'LUMICODE_VERSION', '1.5.2' );
+define( 'LUMICODE_VERSION', '1.5.3' );
 define( 'LUMICODE_DIR',     plugin_dir_path( __FILE__ ) );
 define( 'LUMICODE_URL',     plugin_dir_url( __FILE__ ) );
 
@@ -52,11 +52,6 @@ LumiCode_TinyMCE::init();
 LumiCode_Scanner::init();
 if ( is_admin() ) {
     LumiCode_Admin::init();
-}
-
-add_action( 'init', 'lumicode_load_textdomain' );
-function lumicode_load_textdomain() {
-    load_plugin_textdomain( 'lumicode', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 }
 
 add_filter( 'the_content', 'do_shortcode',     8 );

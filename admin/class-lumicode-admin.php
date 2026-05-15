@@ -1,6 +1,6 @@
 <?php
 /**
- * LumiCode Admin — v1.5.2
+ * LumiCode Admin — v1.5.3
  * Icons: Phosphor Icons web font via CDN (unpkg.com/@phosphor-icons/web)
  */
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -17,7 +17,7 @@ class LumiCode_Admin {
     /* ── AJAX: instantly save light_mode to DB ─────────────── */
     public static function ajax_set_light_mode() {
         check_ajax_referer( 'lumicode_light_mode', 'nonce' );
-        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( __( 'Unauthorized', 'lumicode' ) );
+        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( esc_html__( 'Unauthorized', 'lumicode-syntax-highlighter' ) );
         $light = ( isset( $_POST['light'] ) && $_POST['light'] === '1' );
         $s = LumiCode_Settings::get();
         $s['light_mode'] = $light;
@@ -28,7 +28,7 @@ class LumiCode_Admin {
     /* ── AJAX: flush asset cache via touch() ───────────────── */
     public static function ajax_flush_cache() {
         check_ajax_referer( 'lumicode_flush_cache', 'nonce' );
-        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( __( 'Unauthorized', 'lumicode' ) );
+        if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( esc_html__( 'Unauthorized', 'lumicode-syntax-highlighter' ) );
         /*
          * touch() updates each file's mtime to "now".
          * Frontend uses filemtime() for the ?ver= query string,
@@ -41,8 +41,16 @@ class LumiCode_Admin {
             LUMICODE_DIR . 'assets/css/admin-settings.css',
             LUMICODE_DIR . 'assets/js/admin-settings.js',
         ];
+        global $wp_filesystem;
+        if ( empty( $wp_filesystem ) ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            WP_Filesystem();
+        }
+
         foreach ( $files as $f ) {
-            if ( file_exists( $f ) ) @touch( $f );
+            if ( $wp_filesystem->exists( $f ) ) {
+                $wp_filesystem->touch( $f );
+            }
         }
         wp_send_json_success();
     }
@@ -54,8 +62,8 @@ class LumiCode_Admin {
             'lumicode', [ __CLASS__, 'render_settings' ],
             'dashicons-editor-code', 81
         );
-        add_submenu_page( 'lumicode', __( 'Settings', 'lumicode' ),     __( 'Settings', 'lumicode' ),     'manage_options', 'lumicode',         [ __CLASS__, 'render_settings' ] );
-        add_submenu_page( 'lumicode', __( 'Code Scanner', 'lumicode' ), __( 'Code Scanner', 'lumicode' ), 'edit_posts',     'lumicode-scanner', [ __CLASS__, 'render_scanner' ] );
+        add_submenu_page( 'lumicode', esc_html__( 'Settings', 'lumicode-syntax-highlighter' ),     esc_html__( 'Settings', 'lumicode-syntax-highlighter' ),     'manage_options', 'lumicode',         [ __CLASS__, 'render_settings' ] );
+        add_submenu_page( 'lumicode', esc_html__( 'Code Scanner', 'lumicode-syntax-highlighter' ), esc_html__( 'Code Scanner', 'lumicode-syntax-highlighter' ), 'edit_posts',     'lumicode-scanner', [ __CLASS__, 'render_scanner' ] );
     }
 
     /* ── Enqueue ───────────────────────────────────────────── */
@@ -68,13 +76,13 @@ class LumiCode_Admin {
         // Local assets — compliant with WP.org
         wp_enqueue_style( 'phosphor-icons',
             LUMICODE_URL . 'assets/vendor/css/phosphor/style.css',
-            [], null );
+            [], LUMICODE_VERSION );
         wp_enqueue_style( 'lumicode-hljs-theme-admin',
             LumiCode_Settings::theme_url( $theme ),
-            [], null );
+            [], LUMICODE_VERSION );
         wp_enqueue_script( 'lumicode-hljs-admin',
             LUMICODE_URL . 'assets/vendor/js/highlight.min.js',
-            [], null, false );
+            [], LUMICODE_VERSION, false );
 
         /*
          * INLINE CSS/JS — CSS and JS content embedded directly in the HTML page.
@@ -83,7 +91,7 @@ class LumiCode_Admin {
          * We read the raw file content and inject it via wp_add_inline_style/script.
          */
         wp_register_style( 'lumicode-admin-inline', false,
-            [ 'phosphor-icons', 'lumicode-hljs-theme-admin' ] );
+            [ 'phosphor-icons', 'lumicode-hljs-theme-admin' ], LUMICODE_VERSION );
         wp_enqueue_style( 'lumicode-admin-inline' );
         wp_add_inline_style( 'lumicode-admin-inline',
             self::read_asset( 'assets/css/admin-shared.css' ) .
@@ -94,7 +102,7 @@ class LumiCode_Admin {
         );
 
         wp_register_script( 'lumicode-admin-inline-js', false,
-            [ 'jquery', 'lumicode-hljs-admin' ], false, true );
+            [ 'jquery', 'lumicode-hljs-admin' ], LUMICODE_VERSION, true );
         wp_enqueue_script( 'lumicode-admin-inline-js' );
         wp_add_inline_script( 'lumicode-admin-inline-js',
             $is_scanner
@@ -111,17 +119,17 @@ class LumiCode_Admin {
                     'lightModeNonce' => wp_create_nonce( 'lumicode_light_mode' ),
                     'isLightMode'    => ! empty( $s['light_mode'] ),
                     'i18n'           => [
-                        'scanning'              => __( 'Scanning your site…', 'lumicode' ),
-                        'noResults'             => __( 'No unformatted code blocks found.', 'lumicode' ),
-                        'error'                 => __( 'Request failed. Please try again.', 'lumicode' ),
-                        'confirmApplyAll'       => __( 'Apply LumiCode formatting to all pending blocks? Reversible via post revisions.', 'lumicode' ),
-                        'confirmClearDismissed' => __( 'Show all previously dismissed blocks again?', 'lumicode' ),
-                        'appliedSuccess'        => __( 'Applied successfully', 'lumicode' ),
-                        'applying'              => __( 'Applying…', 'lumicode' ),
-                        'dismissed'             => __( 'Dismissed', 'lumicode' ),
-                        'pendingCount'          => __( 'pending', 'lumicode' ),
-                        'appliedCount'          => __( 'applied', 'lumicode' ),
-                        'dismissedCount'        => __( 'dismissed', 'lumicode' ),
+                        'scanning'              => esc_html__( 'Scanning your site…', 'lumicode-syntax-highlighter' ),
+                        'noResults'             => esc_html__( 'No unformatted code blocks found.', 'lumicode-syntax-highlighter' ),
+                        'error'                 => esc_html__( 'Request failed. Please try again.', 'lumicode-syntax-highlighter' ),
+                        'confirmApplyAll'       => esc_html__( 'Apply LumiCode formatting to all pending blocks? Reversible via post revisions.', 'lumicode-syntax-highlighter' ),
+                        'confirmClearDismissed' => esc_html__( 'Show all previously dismissed blocks again?', 'lumicode-syntax-highlighter' ),
+                        'appliedSuccess'        => esc_html__( 'Applied successfully', 'lumicode-syntax-highlighter' ),
+                        'applying'              => esc_html__( 'Applying…', 'lumicode-syntax-highlighter' ),
+                        'dismissed'             => esc_html__( 'Dismissed', 'lumicode-syntax-highlighter' ),
+                        'pendingCount'          => esc_html__( 'pending', 'lumicode-syntax-highlighter' ),
+                        'appliedCount'          => esc_html__( 'applied', 'lumicode-syntax-highlighter' ),
+                        'dismissedCount'        => esc_html__( 'dismissed', 'lumicode-syntax-highlighter' ),
                     ],
                 ] ) . ';',
                 'before'
@@ -137,14 +145,14 @@ class LumiCode_Admin {
                     'lightModeNonce' => wp_create_nonce( 'lumicode_light_mode' ),
                     'isLightMode'    => ! empty( $s['light_mode'] ),
                     'i18n'           => [
-                        'saving'             => __( 'Saving…', 'lumicode' ),
-                        'saved'              => __( 'Saved!', 'lumicode' ),
-                        'error'              => __( 'Failed to save', 'lumicode' ),
-                        'clearingCache'      => __( 'Clearing cache…', 'lumicode' ),
-                        'cacheCleared'       => __( 'Cache cleared! Reload your frontend.', 'lumicode' ),
-                        'flushFailedPerms'   => __( 'Cache flush failed. Check server permissions on the assets folder.', 'lumicode' ),
-                        'flushFailedNetwork' => __( 'Cache flush failed. Could not reach WordPress AJAX.', 'lumicode' ),
-                        'savingSettings'     => __( 'Saving settings…', 'lumicode' ),
+                        'saving'             => esc_html__( 'Saving…', 'lumicode-syntax-highlighter' ),
+                        'saved'              => esc_html__( 'Saved!', 'lumicode-syntax-highlighter' ),
+                        'error'              => esc_html__( 'Failed to save', 'lumicode-syntax-highlighter' ),
+                        'clearingCache'      => esc_html__( 'Clearing cache…', 'lumicode-syntax-highlighter' ),
+                        'cacheCleared'       => esc_html__( 'Cache cleared! Reload your frontend.', 'lumicode-syntax-highlighter' ),
+                        'flushFailedPerms'   => esc_html__( 'Cache flush failed. Check server permissions on the assets folder.', 'lumicode-syntax-highlighter' ),
+                        'flushFailedNetwork' => esc_html__( 'Cache flush failed. Could not reach WordPress AJAX.', 'lumicode-syntax-highlighter' ),
+                        'savingSettings'     => esc_html__( 'Saving settings…', 'lumicode-syntax-highlighter' ),
                     ]
                 ] ) . ';',
                 'before'
@@ -186,20 +194,20 @@ class LumiCode_Admin {
                         <div class="lc-col">
 
                             <div class="lc-card">
-                                <div class="lc-card-hd"><i class="ph ph-palette"></i> <?php _e( 'Appearance', 'lumicode' ); ?></div>
+                                <div class="lc-card-hd"><i class="ph ph-palette"></i> <?php esc_html_e( 'Appearance', 'lumicode-syntax-highlighter' ); ?></div>
 
                                 <div class="lc-field">
-                                    <label class="lc-lbl" for="lc-theme"><?php _e( 'Color Theme', 'lumicode' ); ?></label>
+                                    <label class="lc-lbl" for="lc-theme"><?php esc_html_e( 'Color Theme', 'lumicode-syntax-highlighter' ); ?></label>
                                     <select name="lumicode_settings[theme]" id="lc-theme">
                                         <?php foreach ( $themes as $val => $label ) : ?>
                                             <option value="<?php echo esc_attr($val); ?>" <?php selected($s['theme'],$val); ?>><?php echo esc_html($label); ?></option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <p class="lc-hint"><?php _e( 'Preview updates live below.', 'lumicode' ); ?></p>
+                                    <p class="lc-hint"><?php esc_html_e( 'Preview updates live below.', 'lumicode-syntax-highlighter' ); ?></p>
                                 </div>
 
                                 <div class="lc-field">
-                                    <label class="lc-lbl" for="lc-fontsize"><?php _e( 'Font Size', 'lumicode' ); ?></label>
+                                    <label class="lc-lbl" for="lc-fontsize"><?php esc_html_e( 'Font Size', 'lumicode-syntax-highlighter' ); ?></label>
                                     <div class="lc-inline-row">
                                         <input type="number" id="lc-fontsize"
                                             name="lumicode_settings[font_size]"
@@ -210,22 +218,25 @@ class LumiCode_Admin {
                                 </div>
 
                                 <div class="lc-field">
-                                    <label class="lc-lbl" for="lc-fontfam"><?php _e( 'Font Family', 'lumicode' ); ?></label>
+                                    <label class="lc-lbl" for="lc-fontfam"><?php esc_html_e( 'Font Family', 'lumicode-syntax-highlighter' ); ?></label>
                                     <input type="text" id="lc-fontfam"
                                         name="lumicode_settings[font_family]"
                                         value="<?php echo esc_attr($s['font_family']); ?>">
-                                    <p class="lc-hint"><?php printf( __( 'Comma-separated, e.g. %s', 'lumicode' ), '<code>JetBrains Mono, monospace</code>' ); ?></p>
+                                    <p class="lc-hint"><?php 
+                                        /* translators: %s: example font stack */
+                                        printf( esc_html__( 'Comma-separated, e.g. %s', 'lumicode-syntax-highlighter' ), '<code>JetBrains Mono, monospace</code>' ); 
+                                    ?></p>
                                 </div>
                             </div>
 
                             <div class="lc-card">
-                                <div class="lc-card-hd"><i class="ph ph-sliders"></i> <?php _e( 'Features', 'lumicode' ); ?></div>
+                                <div class="lc-card-hd"><i class="ph ph-sliders"></i> <?php esc_html_e( 'Features', 'lumicode-syntax-highlighter' ); ?></div>
                                 <?php
                                 $features = [
-                                    'copy_button'    => [ __( 'Copy Button', 'lumicode' ),    __( 'One-click copy on every code block', 'lumicode' ) ],
-                                    'line_numbers'   => [ __( 'Line Numbers', 'lumicode' ),   __( 'Numbered gutter column on the left', 'lumicode' ) ],
-                                    'language_badge' => [ __( 'Language Badge', 'lumicode' ), __( 'Shows detected language in the header bar', 'lumicode' ) ],
-                                    'auto_detect'    => [ __( 'Auto-Enhance', 'lumicode' ),   __( 'Wrap bare &lt;pre&gt; tags sitewide', 'lumicode' ) ],
+                                    'copy_button'    => [ esc_html__( 'Copy Button', 'lumicode-syntax-highlighter' ),    esc_html__( 'One-click copy on every code block', 'lumicode-syntax-highlighter' ) ],
+                                    'line_numbers'   => [ esc_html__( 'Line Numbers', 'lumicode-syntax-highlighter' ),   esc_html__( 'Numbered gutter column on the left', 'lumicode-syntax-highlighter' ) ],
+                                    'language_badge' => [ esc_html__( 'Language Badge', 'lumicode-syntax-highlighter' ), esc_html__( 'Shows detected language in the header bar', 'lumicode-syntax-highlighter' ) ],
+                                    'auto_detect'    => [ esc_html__( 'Auto-Enhance', 'lumicode-syntax-highlighter' ),   esc_html__( 'Wrap bare &lt;pre&gt; tags sitewide', 'lumicode-syntax-highlighter' ) ],
                                 ];
                                 foreach ( $features as $key => [ $name, $desc ] ) :
                                     $on = ! empty( $s[ $key ] );
@@ -236,7 +247,7 @@ class LumiCode_Admin {
                                         value="1"<?php checked($on); ?>>
                                     <span class="lc-toggle-info">
                                         <span class="lc-toggle-name"><?php echo esc_html($name); ?></span>
-                                        <span class="lc-toggle-desc"><?php echo $desc; ?></span>
+                                        <span class="lc-toggle-desc"><?php echo esc_html($desc); ?></span>
                                     </span>
                                     <span class="lc-switch"><span class="lc-thumb"></span></span>
                                 </label>
@@ -249,8 +260,8 @@ class LumiCode_Admin {
                                         name="lumicode_settings[light_mode]"
                                         value="1"<?php checked($lm_on); ?>>
                                     <span class="lc-toggle-info">
-                                        <span class="lc-toggle-name"><?php _e( 'Light Mode', 'lumicode' ); ?></span>
-                                        <span class="lc-toggle-desc"><?php _e( 'Switch admin &amp; frontend code boxes to light theme', 'lumicode' ); ?></span>
+                                        <span class="lc-toggle-name"><?php esc_html_e( 'Light Mode', 'lumicode-syntax-highlighter' ); ?></span>
+                                        <span class="lc-toggle-desc"><?php esc_html_e( 'Switch admin &amp; frontend code boxes to light theme', 'lumicode-syntax-highlighter' ); ?></span>
                                     </span>
                                     <span class="lc-switch"><span class="lc-thumb"></span></span>
                                 </label>
@@ -258,17 +269,20 @@ class LumiCode_Admin {
                                 <!-- Auto-collapse threshold -->
                                 <div class="lc-field" style="margin-top:10px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05);">
                                     <label class="lc-lbl" for="lc-collapse-after">
-                                        <?php _e( 'Auto-Collapse After', 'lumicode' ); ?>
-                                        <span style="font-weight:400;color:rgba(148,163,184,0.45);font-size:10px;text-transform:none;letter-spacing:0;margin-left:4px;">(<?php _e( 'lines', 'lumicode' ); ?>)</span>
+                                        <?php esc_html_e( 'Auto-Collapse After', 'lumicode-syntax-highlighter' ); ?>
+                                        <span style="font-weight:400;color:rgba(148,163,184,0.45);font-size:10px;text-transform:none;letter-spacing:0;margin-left:4px;">(<?php esc_html_e( 'lines', 'lumicode-syntax-highlighter' ); ?>)</span>
                                     </label>
                                     <div class="lc-inline-row">
                                         <input type="number" id="lc-collapse-after"
                                             name="lumicode_settings[collapse_after]"
                                             value="<?php echo esc_attr($s['collapse_after']); ?>"
                                             min="0" max="500" style="width:80px;">
-                                        <span class="lc-unit"><?php _e( 'lines', 'lumicode' ); ?></span>
+                                        <span class="lc-unit"><?php esc_html_e( 'lines', 'lumicode-syntax-highlighter' ); ?></span>
                                     </div>
-                                    <p class="lc-hint"><?php printf( __( 'Code blocks longer than this auto-collapse. Set %s to disable.', 'lumicode' ), '<strong>0</strong>' ); ?></p>
+                                    <p class="lc-hint"><?php 
+                                        /* translators: %s: bold '0' */
+                                        printf( esc_html__( 'Code blocks longer than this auto-collapse. Set %s to disable.', 'lumicode-syntax-highlighter' ), '<strong>0</strong>' ); 
+                                    ?></p>
                                 </div>
                             </div>
 
@@ -289,7 +303,7 @@ class LumiCode_Admin {
                                             <span class="lc-pw-dot-indicator"></span>
                                             fetchUser.ts
                                         </div>
-                                        <button class="lc-pw-copybtn" type="button" tabindex="-1"><?php _e( 'Copy', 'lumicode' ); ?></button>
+                                        <button class="lc-pw-copybtn" type="button" tabindex="-1"><?php esc_html_e( 'Copy', 'lumicode-syntax-highlighter' ); ?></button>
                                     </div>
                                     <div class="lc-pw-code" id="lc-preview-code">
 <pre><code class="language-typescript">async function fetchUser(
@@ -305,27 +319,33 @@ class LumiCode_Admin {
                                     </div>
                                     <div class="lc-pw-statusbar">
                                         <div class="lc-pw-status-left">
-                                            <span><?php _e( 'Ln 1, Col 1', 'lumicode' ); ?></span>
-                                            <span><?php _e( 'UTF-8', 'lumicode' ); ?></span>
-                                            <span><?php _e( 'LF', 'lumicode' ); ?></span>
+                                            <span><?php esc_html_e( 'Ln 1, Col 1', 'lumicode-syntax-highlighter' ); ?></span>
+                                            <span><?php esc_html_e( 'UTF-8', 'lumicode-syntax-highlighter' ); ?></span>
+                                            <span><?php esc_html_e( 'LF', 'lumicode-syntax-highlighter' ); ?></span>
                                         </div>
-                                        <div class="lc-pw-status-right" id="lc-preview-lang"><?php _e( 'TypeScript', 'lumicode' ); ?></div>
+                                        <div class="lc-pw-status-right" id="lc-preview-lang"><?php esc_html_e( 'TypeScript', 'lumicode-syntax-highlighter' ); ?></div>
                                     </div>
                                 </div>
-                                <p class="lc-hint" style="text-align:center;margin-top:10px;"><?php _e( 'Theme updates live. Saves sitewide on submit.', 'lumicode' ); ?></p>
+                                <p class="lc-hint" style="text-align:center;margin-top:10px;"><?php esc_html_e( 'Theme updates live. Saves sitewide on submit.', 'lumicode-syntax-highlighter' ); ?></p>
                             </div>
 
                             <div class="lc-card">
-                                <div class="lc-card-hd"><i class="ph ph-book-open"></i> <?php _e( 'Shortcode Reference', 'lumicode' ); ?></div>
+                                <div class="lc-card-hd"><i class="ph ph-book-open"></i> <?php esc_html_e( 'Shortcode Reference', 'lumicode-syntax-highlighter' ); ?></div>
                                 <pre class="lc-ref-pre">[lumicode lang="php" title="config.php"
          highlight="2,4-6" collapse="false"]
 &lt;?php echo "Hello World"; ?&gt;
 [/lumicode]</pre>
                                 <table class="lc-ref-table">
-                                    <tr><td>lang</td><td><?php _e( 'php, javascript, css, html… (optional, auto-detected)', 'lumicode' ); ?></td></tr>
-                                    <tr><td>title</td><td><?php _e( 'Filename shown in the header bar', 'lumicode' ); ?></td></tr>
-                                    <tr><td>highlight</td><td><?php printf( __( 'Lines to accent, e.g. %s', 'lumicode' ), '<code>3,5-7</code>' ); ?></td></tr>
-                                    <tr><td>collapse</td><td><?php printf( __( '%s makes the block collapsible', 'lumicode' ), '<code>true</code>' ); ?></td></tr>
+                                    <tr><td>lang</td><td><?php esc_html_e( 'php, javascript, css, html… (optional, auto-detected)', 'lumicode-syntax-highlighter' ); ?></td></tr>
+                                    <tr><td>title</td><td><?php esc_html_e( 'Filename shown in the header bar', 'lumicode-syntax-highlighter' ); ?></td></tr>
+                                    <tr><td>highlight</td><td><?php 
+                                        /* translators: %s: example line range */
+                                        printf( esc_html__( 'Lines to accent, e.g. %s', 'lumicode-syntax-highlighter' ), '<code>3,5-7</code>' ); 
+                                    ?></td></tr>
+                                    <tr><td>collapse</td><td><?php 
+                                        /* translators: %s: bold 'true' */
+                                        printf( esc_html__( '%s makes the block collapsible', 'lumicode-syntax-highlighter' ), '<code>true</code>' ); 
+                                    ?></td></tr>
                                 </table>
                             </div>
                         </div><!-- /col right -->
@@ -334,15 +354,15 @@ class LumiCode_Admin {
 
                     <div class="lc-save-row">
                         <button type="submit" class="lc-btn lc-btn-primary">
-                            <i class="ph ph-floppy-disk"></i> <?php _e( 'Save Settings', 'lumicode' ); ?>
+                            <i class="ph ph-floppy-disk"></i> <?php esc_html_e( 'Save Settings', 'lumicode-syntax-highlighter' ); ?>
                         </button>
                         <a href="<?php echo esc_url( admin_url('admin.php?page=lumicode-scanner') ); ?>" class="lc-btn lc-btn-ghost">
-                            <i class="ph ph-scan"></i> <?php _e( 'Open Scanner', 'lumicode' ); ?>
+                            <i class="ph ph-scan"></i> <?php esc_html_e( 'Open Scanner', 'lumicode-syntax-highlighter' ); ?>
                         </a>
-                        <button type="button" id="lc-flush-cache" class="lc-btn lc-btn-ghost" title="<?php esc_attr_e( 'Forces browsers to reload the latest CSS and JS files.', 'lumicode' ); ?>">
-                            <i class="ph ph-arrow-counter-clockwise"></i> <?php _e( 'Flush Asset Cache', 'lumicode' ); ?>
+                        <button type="button" id="lc-flush-cache" class="lc-btn lc-btn-ghost" title="<?php esc_attr_e( 'Forces browsers to reload the latest CSS and JS files.', 'lumicode-syntax-highlighter' ); ?>">
+                            <i class="ph ph-arrow-counter-clockwise"></i> <?php esc_html_e( 'Flush Asset Cache', 'lumicode-syntax-highlighter' ); ?>
                         </button>
-                        <span id="lc-saved-msg" class="lc-saved-msg"><?php _e( 'Settings saved!', 'lumicode' ); ?></span>
+                        <span id="lc-saved-msg" class="lc-saved-msg"><?php esc_html_e( 'Settings saved!', 'lumicode-syntax-highlighter' ); ?></span>
                     </div>
 
                 </form>
@@ -357,8 +377,8 @@ class LumiCode_Admin {
                 <div style="font-size:15px;font-weight:700;color:#e2e8f0;margin-bottom:8px;" id="lc-fmodal-title"></div>
                 <div style="font-size:13px;color:rgba(148,163,184,0.6);line-height:1.6;margin-bottom:24px;" id="lc-fmodal-body"></div>
                 <div style="display:flex;gap:10px;justify-content:center;">
-                    <button id="lc-fmodal-yes" class="lc-btn lc-btn-primary lc-btn-sm"><?php _e( 'Yes, apply to frontend', 'lumicode' ); ?></button>
-                    <button id="lc-fmodal-no"  class="lc-btn lc-btn-ghost lc-btn-sm"><?php _e( 'Admin only', 'lumicode' ); ?></button>
+                    <button id="lc-fmodal-yes" class="lc-btn lc-btn-primary lc-btn-sm"><?php esc_html_e( 'Yes, apply to frontend', 'lumicode-syntax-highlighter' ); ?></button>
+                    <button id="lc-fmodal-no"  class="lc-btn lc-btn-ghost lc-btn-sm"><?php esc_html_e( 'Admin only', 'lumicode-syntax-highlighter' ); ?></button>
                 </div>
             </div>
         </div>
@@ -381,26 +401,29 @@ class LumiCode_Admin {
                 <div class="lc-info-row">
                     <div class="lc-info-card">
                         <span class="lc-info-icon lc-info-icon--purple"><i class="ph ph-shield-check"></i></span>
-                        <div><strong><?php _e( 'Safe by design', 'lumicode' ); ?></strong><span><?php _e( 'Nothing changes without your explicit approval per block.', 'lumicode' ); ?></span></div>
+                        <div><strong><?php esc_html_e( 'Safe by design', 'lumicode-syntax-highlighter' ); ?></strong><span><?php esc_html_e( 'Nothing changes without your explicit approval per block.', 'lumicode-syntax-highlighter' ); ?></span></div>
                     </div>
                     <div class="lc-info-card">
                         <span class="lc-info-icon lc-info-icon--blue"><i class="ph ph-arrow-counter-clockwise"></i></span>
-                        <div><strong><?php _e( 'Fully reversible', 'lumicode' ); ?></strong><span><?php _e( 'All changes go through WordPress post revisions.', 'lumicode' ); ?></span></div>
+                        <div><strong><?php esc_html_e( 'Fully reversible', 'lumicode-syntax-highlighter' ); ?></strong><span><?php esc_html_e( 'All changes go through WordPress post revisions.', 'lumicode-syntax-highlighter' ); ?></span></div>
                     </div>
                     <div class="lc-info-card">
                         <span class="lc-info-icon lc-info-icon--green"><i class="ph ph-crosshair"></i></span>
-                        <div><strong><?php _e( 'Per-block precision', 'lumicode' ); ?></strong><span><?php _e( 'Each block has a fingerprint. One approval = one block.', 'lumicode' ); ?></span></div>
+                        <div><strong><?php esc_html_e( 'Per-block precision', 'lumicode-syntax-highlighter' ); ?></strong><span><?php esc_html_e( 'Each block has a fingerprint. One approval = one block.', 'lumicode-syntax-highlighter' ); ?></span></div>
                     </div>
                 </div>
 
                 <div class="lc-toolbar">
                     <button id="lc-run-scan" class="lc-btn lc-btn-primary">
-                        <i class="ph ph-magnifying-glass"></i> <?php _e( 'Scan Posts &amp; Pages', 'lumicode' ); ?>
+                        <i class="ph ph-magnifying-glass"></i> <?php esc_html_e( 'Scan Posts &amp; Pages', 'lumicode-syntax-highlighter' ); ?>
                     </button>
                     <?php if ( $dismissed_count > 0 ) : ?>
                     <button id="lc-clear-dismissed" class="lc-btn lc-btn-ghost">
                         <i class="ph ph-arrow-counter-clockwise"></i>
-                        <?php printf( __( 'Show %s Dismissed', 'lumicode' ), esc_html($dismissed_count) ); ?>
+                        <?php 
+                            /* translators: %s: number of dismissed blocks */
+                            printf( esc_html__( 'Show %s Dismissed', 'lumicode-syntax-highlighter' ), esc_html($dismissed_count) ); 
+                        ?>
                     </button>
                     <?php endif; ?>
                     <span id="lc-scan-status" class="lc-scan-status"></span>
@@ -409,13 +432,13 @@ class LumiCode_Admin {
                 <div id="lc-summary-bar" style="display:none;">
                     <div class="lc-summary-bar">
                         <div class="lc-chips">
-                            <span id="lc-chip-pending"   class="lc-chip lc-chip-pending"><?php _e( '0 pending', 'lumicode' ); ?></span>
-                            <span id="lc-chip-applied"   class="lc-chip lc-chip-applied"><?php _e( '0 applied', 'lumicode' ); ?></span>
-                            <span id="lc-chip-dismissed" class="lc-chip lc-chip-dismissed"><?php _e( '0 dismissed', 'lumicode' ); ?></span>
+                            <span id="lc-chip-pending"   class="lc-chip lc-chip-pending"><?php esc_html_e( '0 pending', 'lumicode-syntax-highlighter' ); ?></span>
+                            <span id="lc-chip-applied"   class="lc-chip lc-chip-applied"><?php esc_html_e( '0 applied', 'lumicode-syntax-highlighter' ); ?></span>
+                            <span id="lc-chip-dismissed" class="lc-chip lc-chip-dismissed"><?php esc_html_e( '0 dismissed', 'lumicode-syntax-highlighter' ); ?></span>
                         </div>
                         <div style="display:flex;gap:8px;">
-                            <button id="lc-accept-all"  class="lc-btn lc-btn-primary lc-btn-sm"><i class="ph ph-check"></i> <?php _e( 'Accept All', 'lumicode' ); ?></button>
-                            <button id="lc-dismiss-all" class="lc-btn lc-btn-ghost lc-btn-sm"><i class="ph ph-x"></i> <?php _e( 'Dismiss All', 'lumicode' ); ?></button>
+                            <button id="lc-accept-all"  class="lc-btn lc-btn-primary lc-btn-sm"><i class="ph ph-check"></i> <?php esc_html_e( 'Accept All', 'lumicode-syntax-highlighter' ); ?></button>
+                            <button id="lc-dismiss-all" class="lc-btn lc-btn-ghost lc-btn-sm"><i class="ph ph-x"></i> <?php esc_html_e( 'Dismiss All', 'lumicode-syntax-highlighter' ); ?></button>
                         </div>
                     </div>
                 </div>
@@ -453,8 +476,11 @@ class LumiCode_Admin {
                     </div>
                     <div class="lc-placeholder-overlay">
                         <div class="lc-placeholder-overlay-icon"><i class="ph ph-magnifying-glass"></i></div>
-                        <p class="lc-placeholder-overlay-title"><?php _e( 'Ready to scan', 'lumicode' ); ?></p>
-                        <p class="lc-placeholder-overlay-sub"><?php printf( __( 'Click %s above to find code blocks that aren\'t yet using LumiCode formatting.', 'lumicode' ), '<strong>' . __( 'Scan Posts &amp; Pages', 'lumicode' ) . '</strong>' ); ?></p>
+                        <p class="lc-placeholder-overlay-title"><?php esc_html_e( 'Ready to scan', 'lumicode-syntax-highlighter' ); ?></p>
+                        <p class="lc-placeholder-overlay-sub"><?php 
+                            /* translators: %s: scanning button label */
+                            printf( esc_html__( 'Click %s above to find code blocks that aren\'t yet using LumiCode formatting.', 'lumicode-syntax-highlighter' ), '<strong>' . esc_html__( 'Scan Posts &amp; Pages', 'lumicode-syntax-highlighter' ) . '</strong>' ); 
+                        ?></p>
                     </div>
                 </div>
 
@@ -467,8 +493,8 @@ class LumiCode_Admin {
         <div id="lc-scan-modal">
             <div class="lc-scan-modal-box">
                 <div class="lc-scan-spinner"></div>
-                <div class="lc-scan-modal-title"><?php _e( 'Scanning your site…', 'lumicode' ); ?></div>
-                <div class="lc-scan-modal-sub"><?php _e( 'Checking published posts and pages for bare &lt;pre&gt; blocks.', 'lumicode' ); ?></div>
+                <div class="lc-scan-modal-title"><?php esc_html_e( 'Scanning your site…', 'lumicode-syntax-highlighter' ); ?></div>
+                <div class="lc-scan-modal-sub"><?php esc_html_e( 'Checking published posts and pages for bare &lt;pre&gt; blocks.', 'lumicode-syntax-highlighter' ); ?></div>
             </div>
         </div>
 
@@ -477,12 +503,12 @@ class LumiCode_Admin {
                 <div class="lc-row-hd">
                     <div class="lc-row-hd-left">
                         <a class="lc-row-title" href="__EDIT__" target="_blank">__TITLE__</a>
-                        <a class="lc-row-view"  href="__URL__"  target="_blank"><?php _e( 'View', 'lumicode' ); ?></a>
+                        <a class="lc-row-view"  href="__URL__"  target="_blank"><?php esc_html_e( 'View', 'lumicode-syntax-highlighter' ); ?></a>
                     </div>
                     <div class="lc-row-actions">
-                        <span class="lc-lang-label"><?php _e( 'Lang:', 'lumicode' ); ?></span>
+                        <span class="lc-lang-label"><?php esc_html_e( 'Lang:', 'lumicode-syntax-highlighter' ); ?></span>
                         <select class="lc-lang-sel">
-                            <option value=""><?php _e( 'Auto-detect', 'lumicode' ); ?></option>
+                            <option value=""><?php esc_html_e( 'Auto-detect', 'lumicode-syntax-highlighter' ); ?></option>
                             <option value="php">PHP</option>
                             <option value="javascript">JavaScript</option>
                             <option value="typescript">TypeScript</option>
@@ -498,12 +524,12 @@ class LumiCode_Admin {
                             <option value="rust">Rust</option>
                             <option value="yaml">YAML</option>
                         </select>
-                        <button class="lc-apply-btn"><?php _e( 'Apply', 'lumicode' ); ?></button>
-                        <button class="lc-dismiss-btn" title="<?php esc_attr_e( 'Dismiss', 'lumicode' ); ?>">&#x2715;</button>
+                        <button class="lc-apply-btn"><?php esc_html_e( 'Apply', 'lumicode-syntax-highlighter' ); ?></button>
+                        <button class="lc-dismiss-btn" title="<?php esc_attr_e( 'Dismiss', 'lumicode-syntax-highlighter' ); ?>">&#x2715;</button>
                     </div>
                 </div>
                 <div class="lc-row-snippet">
-                    <div class="lc-snippet-label"><?php _e( 'Code Preview', 'lumicode' ); ?></div>
+                    <div class="lc-snippet-label"><?php esc_html_e( 'Code Preview', 'lumicode-syntax-highlighter' ); ?></div>
                     <pre class="lc-snippet-pre">__CODE__</pre>
                 </div>
                 <div class="lc-row-status"></div>
@@ -527,11 +553,11 @@ class LumiCode_Admin {
             <nav class="lc-topbar-nav">
                 <a href="<?php echo esc_url($url_s); ?>"
                    class="lc-nav<?php echo $active === 'settings' ? ' is-active' : ''; ?>">
-                    <i class="ph ph-gear"></i> Settings
+                    <i class="ph ph-gear"></i> <?php esc_html_e( 'Settings', 'lumicode-syntax-highlighter' ); ?>
                 </a>
                 <a href="<?php echo esc_url($url_c); ?>"
                    class="lc-nav<?php echo $active === 'scanner' ? ' is-active' : ''; ?>">
-                    <i class="ph ph-scan"></i> Code Scanner
+                    <i class="ph ph-scan"></i> <?php esc_html_e( 'Code Scanner', 'lumicode-syntax-highlighter' ); ?>
                 </a>
             </nav>
             <div class="lc-topbar-meta">
@@ -540,7 +566,7 @@ class LumiCode_Admin {
                     <span id="lc-mode-label"><?php echo $is_light ? 'Dark' : 'Light'; ?></span>
                 </button>
                 <span class="lc-version-badge">v<?php echo esc_html(LUMICODE_VERSION); ?></span>
-                <a href="https://cr8vstacks.com" target="_blank" class="lc-ext-link"><?php _e( 'Cr8v Stacks', 'lumicode' ); ?> ↗</a>
+                <a href="https://cr8vstacks.com" target="_blank" class="lc-ext-link"><?php esc_html_e( 'Cr8v Stacks', 'lumicode-syntax-highlighter' ); ?> ↗</a>
             </div>
         </div>
         <script>
