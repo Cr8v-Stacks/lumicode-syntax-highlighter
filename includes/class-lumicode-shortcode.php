@@ -28,7 +28,7 @@ class LumiCode_Shortcode {
         $content = html_entity_decode( $content, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
         // Strip any <br> or <p> tags wpautop may have injected into the content
         $content = preg_replace( '#<br\s*/?>(\s*<br\s*/?>)*#i', "\n", $content );
-        $content = strip_tags( $content );
+        $content = wp_strip_all_tags( $content );
 
         $data_attrs  = '';
         if ( $lang )            $data_attrs .= ' data-lang="'           . esc_attr( $lang )           . '"';

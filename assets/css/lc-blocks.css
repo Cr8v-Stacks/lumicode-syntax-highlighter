@@ -4,6 +4,64 @@
    ============================================================= */
 
 /* ── Block wrapper ───────────────────────────────────────── */
+/* Inline code-style elements in post content */
+code:not(pre code):not(.hljs),
+samp:not(pre samp),
+var:not(pre var),
+kbd:not(pre kbd),
+.lumicode-inline-code,
+.lumicode-inline-samp,
+.lumicode-inline-var,
+.lumicode-inline-kbd {
+    display: inline !important;
+    margin: 0 0.08em !important;
+    padding: 0.13em 0.42em !important;
+    border: 1px solid rgba(30,64,175,0.62) !important;
+    border-radius: 5px !important;
+    background: transparent !important;
+    color: #1e40af !important;
+    box-shadow: none !important;
+    font-size: 0.88em !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    line-height: 1.55 !important;
+    white-space: nowrap !important;
+    text-decoration: none !important;
+    text-shadow: none !important;
+    vertical-align: baseline !important;
+}
+
+kbd:not(pre kbd),
+.lumicode-inline-kbd {
+    padding: 0.08em 0.42em 0.16em !important;
+    border-color: rgba(30,64,175,0.72) !important;
+    background: transparent !important;
+    color: #1e40af !important;
+    box-shadow: none !important;
+}
+
+.lumicode-is-light code:not(pre code):not(.hljs),
+.lumicode-is-light samp:not(pre samp),
+.lumicode-is-light var:not(pre var),
+.lumicode-is-light kbd:not(pre kbd),
+.lumicode-is-light .lumicode-inline-code,
+.lumicode-is-light .lumicode-inline-samp,
+.lumicode-is-light .lumicode-inline-var,
+.lumicode-is-light .lumicode-inline-kbd {
+    border-color: rgba(30,64,175,0.62) !important;
+    background: transparent !important;
+    color: #1e40af !important;
+    box-shadow: none !important;
+}
+
+.lumicode-is-light kbd:not(pre kbd),
+.lumicode-is-light .lumicode-inline-kbd {
+    border-color: rgba(30,64,175,0.72) !important;
+    background: transparent !important;
+    color: #1e40af !important;
+    box-shadow: none !important;
+}
+
 .lc-pw {
     position: relative;
     margin: 1.8em 0 3.8em 0;

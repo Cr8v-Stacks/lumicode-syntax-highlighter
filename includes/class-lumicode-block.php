@@ -26,17 +26,18 @@ class LumiCode_Block {
             'lumicode-block-editor',
             LUMICODE_URL . 'assets/js/block-editor.js',
             [ 'wp-blocks', 'wp-element', 'wp-editor', 'wp-components' ],
-            LUMICODE_VERSION
+            LUMICODE_VERSION,
+            true
         );
         wp_localize_script( 'lumicode-block-editor', 'LumiCodeBlockI18n', [
-            'title'       => __( 'LumiCode Block', 'lumicode' ),
-            'settings'    => __( 'LumiCode Settings', 'lumicode' ),
-            'language'    => __( 'Language', 'lumicode' ),
-            'titleLabel'  => __( 'Title / filename (optional)', 'lumicode' ),
-            'highlight'   => __( 'Highlight lines (e.g. 3,5-7)', 'lumicode' ),
-            'collapsible' => __( 'Collapsible', 'lumicode' ),
-            'placeholder' => __( 'Paste your code here...', 'lumicode' ),
-            'autoDetect'  => __( 'Auto-detect', 'lumicode' ),
+            'title'       => __( 'LumiCode Block', 'lumicode-syntax-highlighter' ),
+            'settings'    => __( 'LumiCode Settings', 'lumicode-syntax-highlighter' ),
+            'language'    => __( 'Language', 'lumicode-syntax-highlighter' ),
+            'titleLabel'  => __( 'Title / filename (optional)', 'lumicode-syntax-highlighter' ),
+            'highlight'   => __( 'Highlight lines (e.g. 3,5-7)', 'lumicode-syntax-highlighter' ),
+            'collapsible' => __( 'Collapsible', 'lumicode-syntax-highlighter' ),
+            'placeholder' => __( 'Paste your code here...', 'lumicode-syntax-highlighter' ),
+            'autoDetect'  => __( 'Auto-detect', 'lumicode-syntax-highlighter' ),
         ] );
     }
 

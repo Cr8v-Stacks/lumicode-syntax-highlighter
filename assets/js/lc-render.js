@@ -27,11 +27,16 @@
         var ff = cfg.fontFamily || "'JetBrains Mono','Fira Code',ui-monospace,monospace";
         var fs = fontSize + 'px';
 
+        document.documentElement.classList.toggle('lumicode-is-light', isLight);
+
         injectStyle('lc-fonts',
             '.lc-pw-code pre,.lc-pw-code pre code{font-family:' + ff + '!important;font-size:' + fs + '!important}' +
+            '.lumicode-inline-code,.lumicode-inline-kbd,.lumicode-inline-samp,.lumicode-inline-var{font-family:' + ff + '!important}' +
             '.lc-pw-line-numbers{font-size:' + fs + '!important;line-height:1.5!important}' +
             '.lc-pw-line-numbers span{line-height:1.5!important}'
         );
+
+        enhanceInlineCode();
 
         document.querySelectorAll('pre.lumicode-pre').forEach(function (pre) {
             if (pre.closest('.lc-pw')) return;
@@ -57,6 +62,20 @@
     }
 
     /* ── Core enhancer ───────────────────────────────────────── */
+    function enhanceInlineCode() {
+        markInline('code', 'lumicode-inline-code');
+        markInline('kbd', 'lumicode-inline-kbd');
+        markInline('samp', 'lumicode-inline-samp');
+        markInline('var', 'lumicode-inline-var');
+    }
+
+    function markInline(selector, className) {
+        document.querySelectorAll(selector).forEach(function (el) {
+            if (el.closest('pre, .lc-pw')) return;
+            el.classList.add(className);
+        });
+    }
+
     function enhanceBlock(pre) {
         if (pre.dataset.lcDone) return;
         pre.dataset.lcDone = '1';

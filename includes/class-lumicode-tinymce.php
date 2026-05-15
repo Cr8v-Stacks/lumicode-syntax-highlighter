@@ -40,8 +40,8 @@ class LumiCode_TinyMCE {
         wp_add_inline_script( 'lumicode-tmce-dialog',
             'window.LumiCodeTMCE = ' . wp_json_encode( [
                 'i18n' => [
-                    'insertTitle' => __( 'Insert LumiCode Block', 'lumicode' ),
-                    'insertText'  => __( '⚡ Code', 'lumicode' ),
+                    'insertTitle' => __( 'Insert LumiCode Block', 'lumicode-syntax-highlighter' ),
+                    'insertText'  => __( '⚡ Code', 'lumicode-syntax-highlighter' ),
                 ]
             ] ) . ';',
             'before'
@@ -351,9 +351,9 @@ class LumiCode_TinyMCE {
                             <path d="M213.85,125.46l-112,120a8,8,0,0,1-13.69-7l14.66-73.34L56.14,130.54a8,8,0,0,1,1-13.08l112-120a8,8,0,0,1,13.69,7L168.17,117.88l46.68,34.58A8,8,0,0,1,213.85,125.46Z"/>
                         </svg>
                     </div>
-                    <span><?php _e( 'Insert Code Block', 'lumicode' ); ?></span>
+                    <span><?php esc_html_e( 'Insert Code Block', 'lumicode-syntax-highlighter' ); ?></span>
                 </div>
-                <button id="lumicode-tmce-close" type="button" aria-label="<?php esc_attr_e( 'Close', 'lumicode' ); ?>">&times;</button>
+                <button id="lumicode-tmce-close" type="button" aria-label="<?php esc_attr_e( 'Close', 'lumicode-syntax-highlighter' ); ?>">&times;</button>
             </div>
 
             <div id="lc-dlg-body">
@@ -361,7 +361,7 @@ class LumiCode_TinyMCE {
                 <!-- Row 1: Language + Filename -->
                 <div class="lc-dlg-row2">
                     <div class="lc-dlg-field">
-                        <label for="lumicode-tmce-lang"><?php _e( 'Language', 'lumicode' ); ?></label>
+                        <label for="lumicode-tmce-lang"><?php esc_html_e( 'Language', 'lumicode-syntax-highlighter' ); ?></label>
                         <select id="lumicode-tmce-lang">
                             <?php foreach ( $langs as $group => $options ) : ?>
                                 <?php if ( is_array( $options ) ) : ?>
@@ -375,19 +375,19 @@ class LumiCode_TinyMCE {
                                 <?php endif; ?>
                             <?php endforeach; ?>
                         </select>
-                        <span id="lumicode-detect-hint">⚡ <?php _e( 'Auto-detected', 'lumicode' ); ?></span>
+                        <span id="lumicode-detect-hint">⚡ <?php esc_html_e( 'Auto-detected', 'lumicode-syntax-highlighter' ); ?></span>
                     </div>
                     <div class="lc-dlg-field">
-                        <label for="lumicode-tmce-title"><?php _e( 'Filename', 'lumicode' ); ?> <span class="opt"><?php _e( 'optional', 'lumicode' ); ?></span></label>
-                        <input type="text" id="lumicode-tmce-title" placeholder="<?php esc_attr_e( 'e.g. config.php', 'lumicode' ); ?>">
+                        <label for="lumicode-tmce-title"><?php esc_html_e( 'Filename', 'lumicode-syntax-highlighter' ); ?> <span class="opt"><?php esc_html_e( 'optional', 'lumicode-syntax-highlighter' ); ?></span></label>
+                        <input type="text" id="lumicode-tmce-title" placeholder="<?php esc_attr_e( 'e.g. config.php', 'lumicode-syntax-highlighter' ); ?>">
                     </div>
                 </div>
 
                 <!-- Code textarea -->
                 <div class="lc-dlg-field">
-                    <label for="lumicode-tmce-code"><?php _e( 'Code', 'lumicode' ); ?></label>
+                    <label for="lumicode-tmce-code"><?php esc_html_e( 'Code', 'lumicode-syntax-highlighter' ); ?></label>
                     <textarea id="lumicode-tmce-code" rows="10"
-                        placeholder="<?php esc_attr_e( 'Paste or type your code here…', 'lumicode' ); ?>"
+                        placeholder="<?php esc_attr_e( 'Paste or type your code here…', 'lumicode-syntax-highlighter' ); ?>"
                         spellcheck="false"></textarea>
                 </div>
 
@@ -395,33 +395,33 @@ class LumiCode_TinyMCE {
                 <div class="lc-dlg-row3">
                     <div class="lc-dlg-field">
                         <label for="lumicode-tmce-highlight">
-                            <?php _e( 'Highlight Lines', 'lumicode' ); ?>
+                            <?php esc_html_e( 'Highlight Lines', 'lumicode-syntax-highlighter' ); ?>
                             <span class="lc-dlg-tip" tabindex="0">?
                                 <span class="lc-dlg-tip-box">
-                                    <?php _e( 'Accent specific lines with a subtle highlight.', 'lumicode' ); ?><br><br>
-                                    <strong><?php _e( 'Examples:', 'lumicode' ); ?></strong><br>
-                                    <code>3</code> — <?php _e( 'single line', 'lumicode' ); ?><br>
-                                    <code>1,5</code> — <?php _e( 'lines 1 and 5', 'lumicode' ); ?><br>
-                                    <code>3-7</code> — <?php _e( 'range', 'lumicode' ); ?><br>
-                                    <code>1,3-5,9</code> — <?php _e( 'mixed', 'lumicode' ); ?><br><br>
-                                    <?php _e( 'Lines are numbered from 1.', 'lumicode' ); ?>
+                                    <?php esc_html_e( 'Accent specific lines with a subtle highlight.', 'lumicode-syntax-highlighter' ); ?><br><br>
+                                    <strong><?php esc_html_e( 'Examples:', 'lumicode-syntax-highlighter' ); ?></strong><br>
+                                    <code>3</code> — <?php esc_html_e( 'single line', 'lumicode-syntax-highlighter' ); ?><br>
+                                    <code>1,5</code> — <?php esc_html_e( 'lines 1 and 5', 'lumicode-syntax-highlighter' ); ?><br>
+                                    <code>3-7</code> — <?php esc_html_e( 'range', 'lumicode-syntax-highlighter' ); ?><br>
+                                    <code>1,3-5,9</code> — <?php esc_html_e( 'mixed', 'lumicode-syntax-highlighter' ); ?><br><br>
+                                    <?php esc_html_e( 'Lines are numbered from 1.', 'lumicode-syntax-highlighter' ); ?>
                                 </span>
                             </span>
                         </label>
-                        <input type="text" id="lumicode-tmce-highlight" placeholder="<?php esc_attr_e( 'e.g. 1,3-5', 'lumicode' ); ?>">
+                        <input type="text" id="lumicode-tmce-highlight" placeholder="<?php esc_attr_e( 'e.g. 1,3-5', 'lumicode-syntax-highlighter' ); ?>">
                     </div>
                     <div class="lc-dlg-field">
                         <label for="lumicode-tmce-collapse-lines">
-                            <?php _e( 'Collapse After', 'lumicode' ); ?> <span class="opt"><?php _e( 'lines', 'lumicode' ); ?></span>
+                            <?php esc_html_e( 'Collapse After', 'lumicode-syntax-highlighter' ); ?> <span class="opt"><?php esc_html_e( 'lines', 'lumicode-syntax-highlighter' ); ?></span>
                         </label>
                         <input type="number" id="lumicode-tmce-collapse-lines"
-                            placeholder="<?php esc_attr_e( 'e.g. 30', 'lumicode' ); ?>" min="0" max="500" value="0">
+                            placeholder="<?php esc_attr_e( 'e.g. 30', 'lumicode-syntax-highlighter' ); ?>" min="0" max="500" value="0">
                     </div>
                     <div class="lc-dlg-field">
                         <label>&nbsp;</label>
                         <label class="lc-dlg-check">
                             <input type="checkbox" id="lumicode-tmce-collapse">
-                            <span><?php _e( 'Force collapse', 'lumicode' ); ?></span>
+                            <span><?php esc_html_e( 'Force collapse', 'lumicode-syntax-highlighter' ); ?></span>
                         </label>
                     </div>
                 </div>
@@ -429,10 +429,10 @@ class LumiCode_TinyMCE {
             </div><!-- /body -->
 
             <div id="lc-dlg-footer">
-                <button id="lumicode-tmce-cancel" type="button"><?php _e( 'Cancel', 'lumicode' ); ?></button>
+                <button id="lumicode-tmce-cancel" type="button"><?php esc_html_e( 'Cancel', 'lumicode-syntax-highlighter' ); ?></button>
                 <button id="lumicode-tmce-insert" type="button">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    <?php _e( 'Insert Code Block', 'lumicode' ); ?>
+                    <?php esc_html_e( 'Insert Code Block', 'lumicode-syntax-highlighter' ); ?>
                 </button>
             </div>
 
@@ -470,9 +470,9 @@ class LumiCode_TinyMCE {
 
     public static function language_options() {
         return [
-            ''  => __( 'Auto-detect', 'lumicode' ),
+            ''  => __( 'Auto-detect', 'lumicode-syntax-highlighter' ),
             // Web
-            __( 'Web', 'lumicode' ) => [
+            __( 'Web', 'lumicode-syntax-highlighter' ) => [
                 'html'       => 'HTML',
                 'css'        => 'CSS',
                 'scss'       => 'SCSS',
@@ -487,7 +487,7 @@ class LumiCode_TinyMCE {
                 'svg'        => 'SVG',
             ],
             // Backend / Systems
-            __( 'Backend & Systems', 'lumicode' ) => [
+            __( 'Backend & Systems', 'lumicode-syntax-highlighter' ) => [
                 'php'        => 'PHP',
                 'python'     => 'Python',
                 'ruby'       => 'Ruby',
@@ -515,7 +515,7 @@ class LumiCode_TinyMCE {
                 'vbnet'      => 'VB.NET',
             ],
             // Data & Query
-            __( 'Data & Query', 'lumicode' ) => [
+            __( 'Data & Query', 'lumicode-syntax-highlighter' ) => [
                 'sql'        => 'SQL',
                 'mysql'      => 'MySQL',
                 'pgsql'      => 'PostgreSQL',
@@ -523,7 +523,7 @@ class LumiCode_TinyMCE {
                 'graphql'    => 'GraphQL',
             ],
             // Shell & Config
-            __( 'Shell & Config', 'lumicode' ) => [
+            __( 'Shell & Config', 'lumicode-syntax-highlighter' ) => [
                 'bash'       => 'Bash / Shell',
                 'powershell' => 'PowerShell',
                 'cmd'        => 'CMD / Batch',
@@ -537,20 +537,20 @@ class LumiCode_TinyMCE {
                 'ansible'    => 'Ansible',
             ],
             // Markup & Docs
-            __( 'Markup & Docs', 'lumicode' ) => [
+            __( 'Markup & Docs', 'lumicode-syntax-highlighter' ) => [
                 'markdown'   => 'Markdown',
                 'latex'      => 'LaTeX',
                 'asciidoc'   => 'AsciiDoc',
             ],
             // Other
-            __( 'Other', 'lumicode' ) => [
+            __( 'Other', 'lumicode-syntax-highlighter' ) => [
                 'diff'       => 'Diff / Patch',
                 'makefile'   => 'Makefile',
                 'vim'        => 'Vim Script',
                 'nix'        => 'Nix',
                 'solidity'   => 'Solidity',
                 'wasm'       => 'WebAssembly',
-                'plaintext'  => __( 'Plain Text', 'lumicode' ),
+                'plaintext'  => __( 'Plain Text', 'lumicode-syntax-highlighter' ),
             ],
         ];
     }
