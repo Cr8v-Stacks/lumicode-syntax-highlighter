@@ -31,8 +31,6 @@
 
         injectStyle('lc-fonts',
             'pre.lumicode-pre,pre.lumicode-pre code,.lc-pw-code pre,.lc-pw-code pre code{font-family:' + ff + '!important;font-size:' + fs + '!important;line-height:1.5!important}' +
-            'pre.lumicode-pre:not(.lc-pw pre){padding:0!important;margin:0!important;background:transparent!important;border:none!important;overflow-x:auto!important;display:block!important}' +
-            'pre.lumicode-pre:not(.lc-pw pre) code{display:block!important;white-space:pre!important;padding:16px!important;border-radius:6px!important}' +
             '.lumicode-inline-code,.lumicode-inline-kbd,.lumicode-inline-samp,.lumicode-inline-var{font-family:' + ff + '!important}' +
             '.lc-pw-line-numbers{font-size:' + fs + '!important;line-height:1.5!important}' +
             '.lc-pw-line-numbers span{line-height:1.5!important}'

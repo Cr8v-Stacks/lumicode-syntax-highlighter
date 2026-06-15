@@ -112,10 +112,11 @@ PHP 8.0 or higher. WordPress 6.0 or higher.
 4. **Collapse / Expand** - long blocks collapse with a gradient overlay and pill button
 5. **TinyMCE dialog and scanner** - insert formatted code or find existing bare `<pre>` blocks
 
-== Changelog ==
+== Changelog
 
 = 1.5.8 =
 * Feature: Added smart DOM auto-detection. The plugin now automatically detects if a code block is nested inside custom styled layouts (like widget blocks with existing copy buttons or headers) and silently disables duplicate mockup window controls.
+* Bug Fix: Removed visual layout overrides (margin, padding, background, border-radius) on raw code blocks to ensure full compatibility with custom layouts.
 
 = 1.5.7 =
 * Feature: Support per-block overrides to disable/customize mockup window chrome (`data-chrome`, `data-titlebar`, `data-statusbar`, `data-copy-button`, `data-line-numbers` attributes or `lc-no-chrome` class).
