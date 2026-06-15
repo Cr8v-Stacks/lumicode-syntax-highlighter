@@ -1,5 +1,5 @@
 /**
- * LumiCode — Frontend Renderer v1.5.7
+ * LumiCode — Frontend Renderer v1.5.8
  * Cr8v Stacks · cr8vstacks.com
  *
  * KEY CHANGES:
@@ -9,11 +9,13 @@
  *   - Light mode modal: when topbar toggle is used, a modal asks
  *     if light mode should also apply to frontend code boxes.
  *     Frontend picks up the setting on next page load from DB.
- *   - v1.5.7: Fixed fake-chrome traversal: plain wrapper divs (e.g. .arch)
- *     are no longer wrongly neutralized. Containers are only neutralized when
- *     they actually contain fake headers/copy buttons. Intermediate child
- *     containers between the fake-chrome parent and the <pre> (e.g. .widget-code)
- *     are also neutralized. Traversal stops at first match.
+ *   - v1.5.7: Fixed fake-chrome traversal: plain wrapper divs are no longer
+ *     wrongly neutralized. Only containers with actual headers/copy buttons
+ *     are neutralized. Traversal stops at first match.
+ *   - v1.5.8: Two-pass container handling. Pass 1 finds fake chrome (custom
+ *     headers/copy buttons) and neutralizes those containers plus intermediates.
+ *     Pass 2 handles plain-wrapper divs (e.g. .arch-box) that contain only
+ *     the <pre>: strips their background/padding so they don’t envelop our UI.
  */
 (function () {
     'use strict';
@@ -97,10 +99,11 @@
         runHljs(code, rawText, lang);
         var displayLang = lang || getLangFromClass(code.className) || '';
 
-        // Auto-detect existing "fake chrome" headers or copy buttons in parent/ancestors.
-        // RULE: Only neutralize a container if it actually contains fake chrome elements
-        //       (custom headers, toolbars, or copy buttons). Plain wrapper divs (like .arch)
-        //       that contain only the <pre> are left completely untouched.
+        // --- Pass 1: Fake-chrome detection (up to 3 ancestor levels) ---
+        // Only neutralize a container if it actually contains fake chrome:
+        // custom headers, titlebars, toolbars, or copy buttons that are not our own.
+        // When found, also neutralize any intermediate child containers between that
+        // ancestor and the <pre> (e.g. .widget-code inside .widget-block).
         (function detectFakeChrome() {
             var ancestor = pre.parentElement;
             var limit = 3;
@@ -109,14 +112,11 @@
                 var hiddenHeaders = [];
                 var hiddenCopy   = [];
 
-                // --- Detect fake headers / titlebars / toolbars (not our own .lc-pw-* elements) ---
-                var headerCandidates = ancestor.querySelectorAll(
+                ancestor.querySelectorAll(
                     '[class*="header" i], [class*="titlebar" i], [class*="toolbar" i]'
-                );
-                headerCandidates.forEach(function (el) {
+                ).forEach(function (el) {
                     if (
                         el.closest('.lc-pw') ||
-                        el.classList.contains('lc-pw') ||
                         el.classList.contains('lc-pw-titlebar') ||
                         el.classList.contains('lc-pw-dots') ||
                         el.classList.contains('lc-pw-dot')
@@ -125,35 +125,48 @@
                     hiddenHeaders.push(el);
                 });
 
-                // --- Detect fake copy buttons (not our own .lc-pw-copybtn) ---
-                var copyCandidates = ancestor.querySelectorAll(
-                    'button[class*="copy" i], button[id*="copy" i], ' +
-                    'a[class*="copy" i], [onclick*="copy" i]'
-                );
-                copyCandidates.forEach(function (el) {
+                ancestor.querySelectorAll(
+                    'button[class*="copy" i], button[id*="copy" i], a[class*="copy" i], [onclick*="copy" i]'
+                ).forEach(function (el) {
                     if (el.closest('.lc-pw') || el.classList.contains('lc-pw-copybtn')) return;
                     el.style.display = 'none';
                     hiddenCopy.push(el);
                 });
 
-                // --- Only neutralize this container if we actually found fake chrome ---
-                var hasFakeChrome = hiddenHeaders.length > 0 || hiddenCopy.length > 0;
-                if (hasFakeChrome) {
+                if (hiddenHeaders.length > 0 || hiddenCopy.length > 0) {
                     ancestor.classList.add('lc-neutralized');
-
-                    // Also neutralize any intermediate child containers between this
-                    // ancestor and the <pre> (e.g. .widget-code wrapping our pre inside .widget-block)
+                    // Neutralize intermediate children that contain the pre (e.g. .widget-code)
                     Array.prototype.forEach.call(ancestor.children, function (child) {
-                        if (child !== ancestor && typeof child.contains === 'function' && child.contains(pre)) {
+                        if (typeof child.contains === 'function' && child.contains(pre)) {
                             child.classList.add('lc-neutralized');
                         }
                     });
-
-                    break; // Found and handled the outermost fake-chrome container — stop traversal
+                    break; // Stop — found and handled the fake-chrome container
                 }
 
                 ancestor = ancestor.parentElement;
                 limit--;
+            }
+        }());
+
+        // --- Pass 2: Plain-wrapper neutralization (direct parent only) ---
+        // If the immediate parent of the <pre> contains nothing but the <pre> itself
+        // (no other visible, non-trivial siblings), neutralize it so its background,
+        // padding, and overflow don't visually envelope our code block UI.
+        (function neutralizePlainWrapper() {
+            var directParent = pre.parentElement;
+            if (!directParent || directParent.classList.contains('lc-neutralized')) return;
+
+            var otherChildren = Array.prototype.filter.call(directParent.children, function (child) {
+                if (child === pre) return false;
+                if (child.style.display === 'none') return false;
+                // Treat empty/whitespace-only elements as non-significant
+                if (!child.textContent.trim() && child.children.length === 0) return false;
+                return true;
+            });
+
+            if (otherChildren.length === 0) {
+                directParent.classList.add('lc-neutralized');
             }
         }());
 

@@ -2,7 +2,17 @@
 
 All notable changes to LumiCode Syntax Highlighter will be documented in this file.
 
+## 1.5.8 - 2026-06-15
+
+### Fixed
+
+- Introduced **two-pass container handling** to correctly deal with both types of wrapping scenarios generically, not case-by-case:
+  - **Pass 1** (up to 3 ancestor levels): detects containers with fake chrome (custom headers, titlebars, toolbars, or copy buttons). Hides those fake elements and neutralizes the container plus any intermediate children between it and the `<pre>` (e.g. `.widget-code` inside `.widget-block`).
+  - **Pass 2** (direct parent only): detects plain wrapper divs (e.g. `.arch-box`) that contain nothing but the `<pre>`. Neutralizes them so their `background`, `padding`, and `overflow` do not visually envelop the plugin UI.
+- The two passes are independent — Pass 2 skips any parent already handled by Pass 1.
+
 ## 1.5.7 - 2026-06-15
+
 
 ### Fixed
 
