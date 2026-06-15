@@ -526,8 +526,8 @@ kbd:not(pre kbd),
 }
 
 /* Reset code element inside pre from external theme overrides */
-.lc-pw-code pre.lumicode-pre code.hljs,
-.lc-pw-code pre.lumicode-pre code.hljs * {
+.lc-pw-code pre.lumicode-pre code,
+.lc-pw-code pre.lumicode-pre code * {
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
@@ -539,10 +539,6 @@ kbd:not(pre kbd),
     height: auto !important;
     width: auto !important;
     max-width: none !important;
-}
-.lc-pw-code pre.lumicode-pre code.hljs * {
-    background: transparent !important;
-    padding: 0 !important;
 }
 
 /* Force standard button reset to protect against themes styling all button elements */
@@ -618,20 +614,17 @@ kbd:not(pre kbd),
     background: #febc2e !important;
 }
 
-/* Broad-spectrum parent wrapper style and pseudo-element neutralization */
+/* Broad-spectrum parent wrapper style neutralization.
+   ONLY strips visual decoration — never layout/structural properties
+   like margin, display, width, height, cursor. Those belong to the page. */
 .lc-neutralized {
-    border: none !important;
     background: transparent !important;
     background-color: transparent !important;
     background-image: none !important;
+    border: none !important;
     box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
     border-radius: 0 !important;
-    min-height: 0 !important;
-    height: auto !important;
-    max-height: none !important;
-    cursor: default !important;
+    padding: 0 !important;
     overflow: visible !important;
     overflow-x: visible !important;
     overflow-y: visible !important;
