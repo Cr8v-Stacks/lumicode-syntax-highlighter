@@ -218,11 +218,6 @@ kbd:not(pre kbd),
     text-shadow: none !important;
 }
 
-.lc-pw-code pre.lumicode-pre code,
-.lc-pw-code pre.lumicode-pre code * {
-    background: transparent !important;
-}
-
 /* ── Status bar ──────────────────────────────────────────── */
 .lc-pw-statusbar {
     height: 30px !important;
@@ -533,7 +528,6 @@ kbd:not(pre kbd),
 /* Reset code element inside pre from external theme overrides */
 .lc-pw-code pre.lumicode-pre code,
 .lc-pw-code pre.lumicode-pre code * {
-    background: transparent !important;
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;

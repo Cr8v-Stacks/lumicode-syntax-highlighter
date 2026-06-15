@@ -7,7 +7,6 @@ All notable changes to LumiCode Syntax Highlighter will be documented in this fi
 ### Added
 
 - Added automatic container detection that hides redundant headers and copy buttons, and neutralizes styling (margins, padding, background, border, shadow, radius) on any purely wrapping parent containers to prevent CSS leaks.
-- Stripped background styling on code elements and their descendants inside highlight wrapper boxes to ensure they transparently inherit from the active theme's code box container.
 
 ### Maintenance
 
