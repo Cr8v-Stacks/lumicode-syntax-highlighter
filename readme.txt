@@ -4,7 +4,7 @@ Donate link: https://cr8vstacks.com
 Tags: syntax highlighter, code block, highlight.js, code snippet, developer
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.5.7
+Stable tag: 1.5.6
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -110,10 +110,8 @@ PHP 8.0 or higher. WordPress 6.0 or higher.
 
 == Changelog ==
 
-= 1.5.7 =
-* Improvement: Automatically detect and hide redundant/outer container headers and copy buttons to prevent double-header mockup layouts on custom page builder widgets.
-
 = 1.5.6 =
+* Improvement: Automatically detect and hide redundant/outer container headers and copy buttons to prevent double-header mockup layouts on custom page builder widgets.
 * Maintenance: Updated bundled highlight.js to v11.11.1 and kept assets served locally.
 * Maintenance: Refined bundled asset loading and shortcode behavior.
 * Maintenance: Refined code block handling across shortcode, scanner, block editor, and auto-enhance flows.

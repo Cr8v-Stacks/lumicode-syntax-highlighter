@@ -2,13 +2,11 @@
 
 All notable changes to LumiCode Syntax Highlighter will be documented in this file.
 
-## 1.5.7 - 2026-06-15
+## 1.5.6 - 2026-05-18
 
 ### Added
 
 - Added automatic container detection that hides outer redundant header layouts and copy buttons to preserve the plugin's premium UI on custom widgets.
-
-## 1.5.6 - 2026-05-18
 
 ### Maintenance
 
