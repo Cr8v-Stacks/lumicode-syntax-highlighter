@@ -20,6 +20,15 @@
 
     var $dialog, $overlay, $code, $lang, $hint, currentEditor;
 
+    function syncDialogMode() {
+        var wrap = document.getElementById('lc-wrap');
+        var dlg  = document.getElementById('lumicode-tmce-dialog');
+        if (!dlg) return;
+        var isLight = (wrap && wrap.classList.contains('lc-theme-light')) ||
+                      localStorage.getItem('lumicode_light') === '1';
+        $(dlg).toggleClass('lc-dlg-light', isLight);
+    }
+
     var LANG_PATTERNS = [
         { lang: 'php',        re: /(<\?php|\becho\b\s+['"\$]|\bfunction\b\s+\w+\s*\(|\$\w+\s*=)/ },
         { lang: 'python',     re: /(\bdef\b\s+\w+\s*\(|^\s*import\s+\w+|\bprint\s*\()/m },
@@ -78,11 +87,19 @@
         $dialog.on('keydown', function (e) {
             if (e.key === 'Enter' && e.ctrlKey) insertCode();
         });
+
+        // Light/dark mode sync with admin topbar
+        var wrap = document.getElementById('lc-wrap');
+        if (wrap && window.MutationObserver) {
+            new MutationObserver(syncDialogMode).observe(wrap, { attributes: true, attributeFilter: ['class'] });
+        }
+        syncDialogMode();
     });
 
     /* ── Open ───────────────────────────────────────────────── */
     window.lumiCodeOpenDialog = function (editor) {
         currentEditor = editor;
+        syncDialogMode();
         $lang.val('').removeData('user-picked');
         $('#lumicode-tmce-title').val('');
         $('#lumicode-tmce-highlight').val('');

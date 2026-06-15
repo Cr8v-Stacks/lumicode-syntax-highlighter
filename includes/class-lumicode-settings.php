@@ -32,7 +32,9 @@ class LumiCode_Settings {
 
     public static function sanitize( $input ) {
         $clean = [];
-        $clean['theme']          = sanitize_text_field( $input['theme'] ?? 'atom-one-dark' );
+        $theme = sanitize_text_field( $input['theme'] ?? 'atom-one-dark' );
+        $allowed = array_keys( self::available_themes() );
+        $clean['theme']          = in_array( $theme, $allowed, true ) ? $theme : 'atom-one-dark';
         $clean['light_mode']     = ! empty( $input['light_mode'] );   // ← was missing, caused toggle to not save
         $clean['line_numbers']   = ! empty( $input['line_numbers'] );
         $clean['copy_button']    = ! empty( $input['copy_button'] );
@@ -65,12 +67,12 @@ class LumiCode_Settings {
     public static function theme_url( $theme ) {
         $file = sanitize_text_field( $theme ) . '.min.css';
         $path = LUMICODE_DIR . 'assets/vendor/css/themes/' . $file;
-        
+
         if ( ! file_exists( $path ) ) {
-            // Fallback to CDN for themes we haven't bundled yet (or just return empty)
-            return 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/' . $file;
+            // Fallback to locally-bundled default theme — no external requests.
+            return LUMICODE_URL . 'assets/vendor/css/themes/atom-one-dark.min.css';
         }
-        
+
         return LUMICODE_URL . 'assets/vendor/css/themes/' . $file;
     }
 

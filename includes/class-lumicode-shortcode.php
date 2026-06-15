@@ -5,7 +5,6 @@ class LumiCode_Shortcode {
 
     public static function init() {
         add_shortcode( 'lumicode', [ __CLASS__, 'render' ] );
-        add_shortcode( 'code',     [ __CLASS__, 'render' ] );
     }
 
     public static function render( $atts, $content = '' ) {
@@ -17,7 +16,7 @@ class LumiCode_Shortcode {
             'collapse_after' => '', // per-block override; '' = use global setting
         ], $atts, 'lumicode' );
 
-        $lang           = sanitize_text_field( $atts['lang'] );
+        $lang           = self::sanitize_language( $atts['lang'] );
         $highlight      = sanitize_text_field( $atts['highlight'] );
         $title          = sanitize_text_field( $atts['title'] );
         $collapse       = $atts['collapse'] === 'true' ? 'true' : 'false';
@@ -51,5 +50,9 @@ class LumiCode_Shortcode {
         $html .= '</div>';
 
         return $html;
+    }
+
+    private static function sanitize_language( $lang ) {
+        return preg_replace( '/[^a-z0-9_-]/i', '', sanitize_text_field( $lang ) );
     }
 }

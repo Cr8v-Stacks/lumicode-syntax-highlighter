@@ -73,17 +73,60 @@ class LumiCode_Frontend {
         $content = preg_replace_callback(
             '/<pre(?![^>]*class=["\'][^"\']*lumicode-pre)([^>]*)>([\s\S]*?)<\/pre>/i',
             function( $m ) {
-                $attrs = $m[1]; $inner = $m[2]; $lang = '';
-                if ( preg_match( '/class=["\']([^"\']*)["\']/', $attrs, $cm ) )
-                    if ( preg_match( '/(?:language|lang)-(\w+)/', $cm[1], $lm ) ) $lang = $lm[1];
-                if ( ! $lang && preg_match( '/<code[^>]+class=["\'][^"\']*(?:language|lang)-(\w+)["\']/', $inner, $lm ) )
-                    $lang = $lm[1];
-                $lang_attr = $lang ? ' data-lang="' . esc_attr( $lang ) . '"' : '';
-                if ( preg_match( '/class=["\']([^"\']*)["\']/', $attrs ) )
-                    $attrs = preg_replace( '/class=["\']([^"\']*)["\']/', 'class="$1 lumicode-pre"', $attrs );
-                else $attrs .= ' class="lumicode-pre"';
-                return '<pre' . $attrs . $lang_attr . '>' . $inner . '</pre>';
+                $attrs_raw = $m[1];
+                $inner     = $m[2];
+                $lang      = '';
+
+                // Safely parse attributes using WordPress core's wp_kses_hair
+                $parsed          = wp_kses_hair( $attrs_raw, [ 'http', 'https' ] );
+                $sanitized_attrs = [];
+                $has_class       = false;
+
+                foreach ( $parsed as $attr ) {
+                    $name = strtolower( $attr['name'] );
+                    $val  = $attr['value'];
+
+                    // Strict attribute allow-list: only permit safe styling/metadata attributes
+                    $is_safe = in_array( $name, [ 'class', 'id', 'title', 'lang' ], true ) || ( strpos( $name, 'data-' ) === 0 );
+                    if ( ! $is_safe ) {
+                        continue;
+                    }
+
+                    if ( $name === 'class' ) {
+                        $has_class = true;
+                        $val       = trim( $val . ' lumicode-pre' );
+                        if ( preg_match( '/(?:language|lang)-(\w+)/', $val, $lm ) ) {
+                            $lang = self::sanitize_language( $lm[1] );
+                        }
+                    }
+
+                    $sanitized_attrs[ $name ] = $val;
+                }
+
+                if ( ! $has_class ) {
+                    $sanitized_attrs['class'] = 'lumicode-pre';
+                }
+
+                if ( ! $lang && preg_match( '/<code[^>]+class=["\'][^"\']*(?:language|lang)-(\w+)["\']/', $inner, $lm ) ) {
+                    $lang = self::sanitize_language( $lm[1] );
+                }
+
+                if ( $lang ) {
+                    $sanitized_attrs['data-lang'] = $lang;
+                }
+
+                // Construct attribute string safely with individual key/value escaping
+                $attrs_str = '';
+                foreach ( $sanitized_attrs as $name => $val ) {
+                    $attrs_str .= ' ' . sanitize_key( $name ) . '="' . esc_attr( $val ) . '"';
+                }
+
+                return '<pre' . $attrs_str . '>' . wp_kses_post( $inner ) . '</pre>';
             }, $content );
         return $content;
+    }
+
+    private static function sanitize_language( $lang ) {
+        return preg_replace( '/[^a-z0-9_-]/i', '', sanitize_text_field( $lang ) );
     }
 }

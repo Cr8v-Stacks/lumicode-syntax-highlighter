@@ -1,5 +1,5 @@
 /**
- * LumiCode — Settings Page JS v1.5.2
+ * LumiCode — Settings Page JS v1.5.6
  * Cr8v Stacks · cr8vstacks.com
  */
 (function ($) {

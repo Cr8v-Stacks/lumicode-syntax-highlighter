@@ -32,6 +32,10 @@ class LumiCode_Scanner {
         ] );
 
         foreach ( $posts as $post_id ) {
+            if ( ! current_user_can( 'edit_post', $post_id ) ) {
+                continue;
+            }
+
             $post    = get_post( $post_id );
             $content = $post->post_content;
 
@@ -93,8 +97,28 @@ class LumiCode_Scanner {
                 );
                 $lang_attr = $use_lang ? ' data-lang="' . esc_attr( $use_lang ) . '"' : '';
                 $applied   = true;
-                // Preserve original inner content exactly — just add lumicode class + lang
-                return '<pre' . $attrs . ' class="lumicode-pre"' . $lang_attr . '>' . $inner . '</pre>';
+
+                // Rebuild attribute string safely — parse via wp_kses_hair, then re-escape each key/value.
+                $parsed_attrs = wp_kses_hair( $attrs, [ 'http', 'https' ] );
+                $safe_attrs   = [];
+                foreach ( $parsed_attrs as $attr ) {
+                    $name = strtolower( $attr['name'] );
+                    // Strict attribute allow-list: only permit safe styling/metadata attributes
+                    $is_safe = in_array( $name, [ 'class', 'id', 'title', 'lang' ], true ) || ( strpos( $name, 'data-' ) === 0 );
+                    if ( ! $is_safe ) {
+                        continue;
+                    }
+                    $safe_attrs[ $name ] = $attr['value'];
+                }
+
+                $safe_attrs['class'] = trim( ( $safe_attrs['class'] ?? '' ) . ' lumicode-pre' );
+
+                $attrs_str = '';
+                foreach ( $safe_attrs as $name => $value ) {
+                    $attrs_str .= ' ' . sanitize_key( $name ) . '="' . esc_attr( $value ) . '"';
+                }
+
+                return '<pre' . $attrs_str . $lang_attr . '>' . wp_kses_post( $inner ) . '</pre>';
             },
             $content
         );
@@ -169,7 +193,7 @@ class LumiCode_Scanner {
     public static function ajax_scan() {
         check_ajax_referer( 'lumicode_scanner', 'nonce' );
         if ( ! current_user_can( 'edit_posts' ) ) {
-            wp_send_json_error( __( 'Unauthorized', 'lumicode-syntax-highlighter' ), 403 );
+            wp_send_json_error( esc_html__( 'Unauthorized', 'lumicode-syntax-highlighter' ), 403 );
         }
         wp_send_json_success( self::scan() );
     }
@@ -177,15 +201,18 @@ class LumiCode_Scanner {
     public static function ajax_apply() {
         check_ajax_referer( 'lumicode_scanner', 'nonce' );
         if ( ! current_user_can( 'edit_posts' ) ) {
-            wp_send_json_error( __( 'Unauthorized', 'lumicode-syntax-highlighter' ), 403 );
+            wp_send_json_error( esc_html__( 'Unauthorized', 'lumicode-syntax-highlighter' ), 403 );
         }
  
-        $post_id     = intval( $_POST['post_id']     ?? 0 );
+        $post_id     = absint( wp_unslash( $_POST['post_id'] ?? 0 ) );
         $fingerprint = sanitize_text_field( wp_unslash( $_POST['fingerprint'] ?? '' ) );
-        $lang        = sanitize_text_field( wp_unslash( $_POST['lang']        ?? '' ) );
+        $lang        = self::sanitize_language( sanitize_text_field( wp_unslash( $_POST['lang'] ?? '' ) ) );
 
         if ( ! $post_id || ! $fingerprint ) {
-            wp_send_json_error( __( 'Missing parameters', 'lumicode-syntax-highlighter' ) );
+            wp_send_json_error( esc_html__( 'Missing parameters', 'lumicode-syntax-highlighter' ) );
+        }
+        if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            wp_send_json_error( esc_html__( 'Unauthorized', 'lumicode-syntax-highlighter' ), 403 );
         }
         wp_send_json_success( [ 'applied' => self::apply_block( $post_id, $fingerprint, $lang ) ] );
     }
@@ -193,12 +220,16 @@ class LumiCode_Scanner {
     public static function ajax_dismiss() {
         check_ajax_referer( 'lumicode_scanner', 'nonce' );
         if ( ! current_user_can( 'edit_posts' ) ) {
-            wp_send_json_error( __( 'Unauthorized', 'lumicode-syntax-highlighter' ), 403 );
+            wp_send_json_error( esc_html__( 'Unauthorized', 'lumicode-syntax-highlighter' ), 403 );
         }
  
         $fingerprint = sanitize_text_field( wp_unslash( $_POST['fingerprint'] ?? '' ) );
+        $post_id     = absint( wp_unslash( $_POST['post_id'] ?? 0 ) );
         if ( ! $fingerprint ) {
-            wp_send_json_error( __( 'Missing fingerprint', 'lumicode-syntax-highlighter' ) );
+            wp_send_json_error( esc_html__( 'Missing fingerprint', 'lumicode-syntax-highlighter' ) );
+        }
+        if ( $post_id && ! current_user_can( 'edit_post', $post_id ) ) {
+            wp_send_json_error( esc_html__( 'Unauthorized', 'lumicode-syntax-highlighter' ), 403 );
         }
         self::dismiss_block( $fingerprint );
         wp_send_json_success();
@@ -207,7 +238,7 @@ class LumiCode_Scanner {
     public static function ajax_clear_dismissed() {
         check_ajax_referer( 'lumicode_scanner', 'nonce' );
         if ( ! current_user_can( 'edit_posts' ) ) {
-            wp_send_json_error( __( 'Unauthorized', 'lumicode-syntax-highlighter' ), 403 );
+            wp_send_json_error( esc_html__( 'Unauthorized', 'lumicode-syntax-highlighter' ), 403 );
         }
         self::clear_dismissed();
         wp_send_json_success();
@@ -218,5 +249,9 @@ class LumiCode_Scanner {
         add_action( 'wp_ajax_lumicode_apply',           [ __CLASS__, 'ajax_apply' ] );
         add_action( 'wp_ajax_lumicode_dismiss',         [ __CLASS__, 'ajax_dismiss' ] );
         add_action( 'wp_ajax_lumicode_clear_dismissed', [ __CLASS__, 'ajax_clear_dismissed' ] );
+    }
+
+    private static function sanitize_language( $lang ) {
+        return preg_replace( '/[^a-z0-9_-]/i', '', sanitize_text_field( $lang ) );
     }
 }

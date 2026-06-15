@@ -43,7 +43,7 @@ class LumiCode_Block {
 
     public static function render_block( $attrs ) {
         $code      = $attrs['code']      ?? '';
-        $lang      = $attrs['language']  ?? '';
+        $lang      = self::sanitize_language( $attrs['language']  ?? '' );
         $highlight = $attrs['highlight'] ?? '';
         $title     = $attrs['title']     ?? '';
         $collapse  = ! empty( $attrs['collapse'] ) ? 'true' : 'false';
@@ -57,5 +57,9 @@ class LumiCode_Block {
         $code_class = $lang ? ' class="language-' . esc_attr( $lang ) . '"' : '';
 
         return '<pre class="lumicode-pre"' . $data_attrs . '><code' . $code_class . '>' . esc_html( $code ) . '</code></pre>';
+    }
+
+    private static function sanitize_language( $lang ) {
+        return preg_replace( '/[^a-z0-9_-]/i', '', sanitize_text_field( $lang ) );
     }
 }

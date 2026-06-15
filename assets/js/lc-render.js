@@ -1,8 +1,8 @@
 /**
- * LumiCode — Frontend Renderer v1.5.2
+ * LumiCode — Frontend Renderer v1.5.6
  * Cr8v Stacks · cr8vstacks.com
  *
- * KEY CHANGES vs 1.5.1:
+ * KEY CHANGES:
  *   - Gutter min-height: after rendering lined blocks, JS reads
  *     codeArea.offsetHeight and sets gutter.style.minHeight.
  *     This fixes the gutter stopping short regardless of overflow/BFC.
@@ -30,7 +30,9 @@
         document.documentElement.classList.toggle('lumicode-is-light', isLight);
 
         injectStyle('lc-fonts',
-            '.lc-pw-code pre,.lc-pw-code pre code{font-family:' + ff + '!important;font-size:' + fs + '!important}' +
+            'pre.lumicode-pre,pre.lumicode-pre code,.lc-pw-code pre,.lc-pw-code pre code{font-family:' + ff + '!important;font-size:' + fs + '!important;line-height:1.5!important}' +
+            'pre.lumicode-pre:not(.lc-pw pre){padding:0!important;margin:0!important;background:transparent!important;border:none!important;overflow-x:auto!important;display:block!important}' +
+            'pre.lumicode-pre:not(.lc-pw pre) code{display:block!important;white-space:pre!important;padding:16px!important;border-radius:6px!important}' +
             '.lumicode-inline-code,.lumicode-inline-kbd,.lumicode-inline-samp,.lumicode-inline-var{font-family:' + ff + '!important}' +
             '.lc-pw-line-numbers{font-size:' + fs + '!important;line-height:1.5!important}' +
             '.lc-pw-line-numbers span{line-height:1.5!important}'
@@ -90,6 +92,12 @@
         var rawText     = code.textContent;
         var lang        = pre.dataset.lang || getLangFromClass(code.className) || '';
         runHljs(code, rawText, lang);
+
+        if (pre.dataset.highlight) applyLineHighlight(code, pre.dataset.highlight);
+
+        var hasChrome = pre.dataset.chrome !== 'false' && !pre.classList.contains('lc-no-chrome');
+        if (!hasChrome) return;
+
         var displayLang = lang || getLangFromClass(code.className) || '';
 
         var codeArea = document.createElement('div');
@@ -102,14 +110,17 @@
         codeArea.parentNode.insertBefore(block, codeArea);
         block.appendChild(codeArea);
 
-        block.insertBefore(buildTitlebar(pre, code, displayLang), codeArea);
-        block.appendChild(buildStatusBar(displayLang));
+        if (pre.dataset.titlebar !== 'false') {
+            block.insertBefore(buildTitlebar(pre, code, displayLang), codeArea);
+        }
+        if (pre.dataset.statusbar !== 'false') {
+            block.appendChild(buildStatusBar(displayLang));
+        }
 
         /* Line numbers FIRST — collapse wraps .lc-pw-lined or .lc-pw-code */
         var gutter = null;
-        if (cfg.lineNumbers) gutter = insertLineNumbers(block, codeArea, pre, code);
-
-        if (pre.dataset.highlight) applyLineHighlight(code, pre.dataset.highlight);
+        var showLineNumbers = pre.dataset.lineNumbers === 'true' || (cfg.lineNumbers && pre.dataset.lineNumbers !== 'false');
+        if (showLineNumbers) gutter = insertLineNumbers(block, codeArea, pre, code);
 
         var lineCount     = rawText.split('\n').length;
         var collapseAfter = pre.dataset.collapseAfter !== undefined
@@ -118,6 +129,7 @@
         var shouldCollapse = pre.dataset.collapse === 'true' ||
             (collapseAfter > 0 && lineCount > collapseAfter && pre.dataset.collapse !== 'false');
         if (shouldCollapse) applyCollapse(block, lineCount, collapseAfter);
+
 
         /* FIX: set gutter min-height = code column height AFTER layout.
          * offsetHeight only works after the element is in the live DOM,
@@ -181,7 +193,8 @@
             if (isTitle) { var ind = document.createElement('span'); ind.className = 'lc-pw-dot-indicator'; centre.appendChild(ind); }
             var txt = document.createElement('span'); txt.textContent = ct; centre.appendChild(txt); bar.appendChild(centre);
         }
-        if (cfg.copyButton !== false) bar.appendChild(buildCopyBtn(code));
+        var showCopy = pre.dataset.copyButton !== 'false' && cfg.copyButton !== false;
+        if (showCopy) bar.appendChild(buildCopyBtn(code));
         return bar;
     }
 

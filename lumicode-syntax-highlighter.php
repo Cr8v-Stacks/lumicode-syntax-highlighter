@@ -1,21 +1,21 @@
 <?php
 /**
- * Plugin Name:       LumiCode – Syntax Highlighter
- * Plugin URI:        https://cr8vstacks.com/lumicode
- * Description:       Beautiful syntax highlighting with auto-detection, copy buttons, line numbers, and a safe scanner.
- * Version:           1.5.3
+ * Plugin Name: LumiCode Syntax Highlighter
+ * Plugin URI: https://cr8vstacks.com/dev-playground/lumicode-syntax-highlighter/
+ * Description: Beautiful syntax highlighting with auto-detection, copy buttons, line numbers, and a safe scanner.
+ * Version: 1.5.7
  * Requires at least: 6.0
- * Requires PHP:      8.0
- * Author:            Cr8v Stacks
- * Author URI:        https://cr8vstacks.com
- * License:           GPL-2.0+
- * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       lumicode-syntax-highlighter
+ * Requires PHP: 8.0
+ * Author: Cr8v Stacks
+ * Author URI: https://cr8vstacks.com
+ * License: GPLv2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: lumicode-syntax-highlighter
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'LUMICODE_VERSION', '1.5.3' );
+define( 'LUMICODE_VERSION', '1.5.7' );
 define( 'LUMICODE_DIR',     plugin_dir_path( __FILE__ ) );
 define( 'LUMICODE_URL',     plugin_dir_url( __FILE__ ) );
 
