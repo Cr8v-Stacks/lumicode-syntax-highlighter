@@ -4,7 +4,7 @@ Donate link: https://cr8vstacks.com
 Tags: syntax highlighter, code block, highlight.js, code snippet, developer
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.5.8
+Stable tag: 1.5.7
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -88,10 +88,6 @@ All 13 built-in themes are bundled and available in Settings. Currently custom t
 
 LumiCode is designed for performance. highlight.js is served completely locally from your own server, eliminating third-party asset requests. Our own CSS + JS is under 15 KB combined, ensuring your site remains blazingly fast.
 
-= Can I disable the mockup window chrome on custom pages =
-
-Yes. You can add `data-chrome="false"` (or class `lc-no-chrome`) to your `<pre>` tag to disable the mockup window, titlebar, status bar, and collapse functionality entirely, keeping only the syntax highlighted code. You can also customize components granularly using attributes: `data-titlebar="false"`, `data-statusbar="false"`, `data-copy-button="false"`, and `data-line-numbers="false"`.
-
 = Can I have different settings per code block=
 
 Yes. Per-block overrides work via shortcode attributes (`lang`, `title`, `highlight`, `collapse`, `collapse-after`) and via the TinyMCE dialog fields. Global defaults come from Settings.
@@ -112,15 +108,10 @@ PHP 8.0 or higher. WordPress 6.0 or higher.
 4. **Collapse / Expand** - long blocks collapse with a gradient overlay and pill button
 5. **TinyMCE dialog and scanner** - insert formatted code or find existing bare `<pre>` blocks
 
-== Changelog
-
-= 1.5.8 =
-* Feature: Added smart DOM auto-detection. The plugin now automatically detects if a code block is nested inside custom styled layouts (like widget blocks with existing copy buttons or headers) and silently disables duplicate mockup window controls.
-* Bug Fix: Removed visual layout overrides (margin, padding, background, border-radius) on raw code blocks to ensure full compatibility with custom layouts.
+== Changelog ==
 
 = 1.5.7 =
-* Feature: Support per-block overrides to disable/customize mockup window chrome (`data-chrome`, `data-titlebar`, `data-statusbar`, `data-copy-button`, `data-line-numbers` attributes or `lc-no-chrome` class).
-* Bug Fix: Improved layout isolation and font rendering for raw/unwrapped code blocks inside custom pages.
+* Improvement: Automatically detect and hide redundant/outer container headers and copy buttons to prevent double-header mockup layouts on custom page builder widgets.
 
 = 1.5.6 =
 * Maintenance: Updated bundled highlight.js to v11.11.1 and kept assets served locally.

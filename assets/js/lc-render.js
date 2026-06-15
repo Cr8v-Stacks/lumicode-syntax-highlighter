@@ -30,8 +30,7 @@
         document.documentElement.classList.toggle('lumicode-is-light', isLight);
 
         injectStyle('lc-fonts',
-            'pre.lumicode-pre,pre.lumicode-pre code,.lc-pw-code pre,.lc-pw-code pre code{font-family:' + ff + '!important;font-size:' + fs + '!important;line-height:1.5!important}' +
-            'pre.lumicode-pre code{border:none!important;padding:0!important;margin:0!important;box-shadow:none!important}' +
+            'pre.lumicode-pre,pre.lumicode-pre code,.lc-pw-code pre,.lc-pw-code pre code{font-family:' + ff + '!important;font-size:' + fs + '!important}' +
             '.lumicode-inline-code,.lumicode-inline-kbd,.lumicode-inline-samp,.lumicode-inline-var{font-family:' + ff + '!important}' +
             '.lc-pw-line-numbers{font-size:' + fs + '!important;line-height:1.5!important}' +
             '.lc-pw-line-numbers span{line-height:1.5!important}'
@@ -91,60 +90,74 @@
         var rawText     = code.textContent;
         var lang        = pre.dataset.lang || getLangFromClass(code.className) || '';
         runHljs(code, rawText, lang);
+        var displayLang = lang || getLangFromClass(code.className) || '';
 
-        if (pre.dataset.highlight) applyLineHighlight(code, pre.dataset.highlight);
-
-        var hasChrome = pre.dataset.chrome !== 'false' && !pre.classList.contains('lc-no-chrome');
-
-        // Auto-detect if block is already prestyled or wrapped in a custom layout (check up to 2 levels)
-        if (hasChrome) {
-            var container = pre.parentElement;
-            var depth = 0;
-            while (container && container !== document.body && depth < 2) {
-                var className = (container.className || '');
-                if (typeof className === 'string') {
-                    className = className.toLowerCase();
-                    if (className.indexOf('widget-block') !== -1 || 
-                        className.indexOf('widget-code') !== -1 || 
-                        className.indexOf('code-window') !== -1) {
-                        hasChrome = false;
-                        break;
-                    }
-                }
-
-                // Scan for existing copy buttons/links or header/title elements outside the pre
-                var hasExistingCopy = false;
-                var hasExistingHeader = false;
-                var children = container.children;
-                for (var i = 0; i < children.length; i++) {
-                    var child = children[i];
-                    if (child.contains(pre)) continue;
-
-                    var childText = (child.textContent || '').toLowerCase().trim();
-                    var childClass = (child.className || '');
-                    if (typeof childClass === 'string') childClass = childClass.toLowerCase();
-
-                    if (childClass.indexOf('copy') !== -1 || childText === 'copy' || childText === 'copied!') {
-                        hasExistingCopy = true;
-                    }
-                    if (childClass.indexOf('header') !== -1 || childClass.indexOf('title') !== -1 || childClass.indexOf('dots') !== -1) {
-                        hasExistingHeader = true;
-                    }
-                }
-
-                if (hasExistingCopy || hasExistingHeader) {
-                    hasChrome = false;
-                    break;
-                }
-
-                container = container.parentElement;
-                depth++;
+        // Auto-detect existing headers or copy buttons in parent/ancestors to avoid double UI
+        var parent = pre.parentElement;
+        var limit = 4;
+        while (parent && limit > 0) {
+            // Find any element styling like a header, toolbar, titlebar or dots that is NOT our own and hide it
+            var headerEl = parent.querySelector('[class*="header" i], [class*="titlebar" i], [class*="toolbar" i], [class*="dots" i]');
+            if (headerEl && !headerEl.closest('.lc-pw') && !headerEl.classList.contains('lc-pw') && !headerEl.classList.contains('lc-pw-titlebar') && !headerEl.classList.contains('lc-pw-dots') && !headerEl.classList.contains('lc-pw-dot')) {
+                headerEl.style.display = 'none';
             }
+
+            // Find any copy button/link containing "copy" that is NOT our own and hide it
+            var copyEl = parent.querySelector('button[class*="copy" i], button[id*="copy" i], a[class*="copy" i], [class*="copy" i]:not(.lc-pw-copybtn), [onclick*="copy" i]');
+            if (copyEl && !copyEl.closest('.lc-pw') && !copyEl.classList.contains('lc-pw-copybtn')) {
+                copyEl.style.display = 'none';
+            }
+
+            parent = parent.parentElement;
+            limit--;
         }
 
-        if (!hasChrome) return;
+        var disableChrome = pre.dataset.chrome === 'false' || pre.classList.contains('lc-no-chrome');
 
-        var displayLang = lang || getLangFromClass(code.className) || '';
+        if (disableChrome) {
+            // Apply lines formatting if line numbers are explicitly requested or highlighting is used
+            var showLineNumbers = pre.dataset.lineNumbers === 'true';
+            var hasHighlight = !!pre.dataset.highlight;
+            if (showLineNumbers || hasHighlight) {
+                var lines = code.innerHTML.split('\n');
+                if (lines[lines.length - 1] === '') lines.pop();
+                code.innerHTML = lines.map(function (l) {
+                    return '<span class="lc-pw-line">' + (l || '\u200b') + '</span>';
+                }).join('\n');
+
+                if (showLineNumbers) {
+                    var gutter = document.createElement('div');
+                    gutter.className = 'lc-pw-line-numbers';
+                    gutter.setAttribute('aria-hidden', 'true');
+                    for (var i = 1; i <= lines.length; i++) {
+                        var s = document.createElement('span'); s.textContent = i; gutter.appendChild(s);
+                    }
+
+                    var codeArea = document.createElement('div');
+                    codeArea.className = 'lc-pw-code';
+                    pre.parentNode.insertBefore(codeArea, pre);
+                    codeArea.appendChild(pre);
+
+                    var lined = document.createElement('div');
+                    lined.className = 'lc-pw-lined';
+                    codeArea.parentNode.insertBefore(lined, codeArea);
+                    lined.appendChild(gutter);
+                    lined.appendChild(codeArea);
+
+                    requestAnimationFrame(function () {
+                        var h = codeArea.scrollHeight || codeArea.offsetHeight;
+                        if (h > 0) gutter.style.minHeight = h + 'px';
+                    });
+                }
+            }
+
+            if (pre.dataset.highlight) applyLineHighlight(code, pre.dataset.highlight);
+            return;
+        }
+
+        var showTitlebar = pre.dataset.titlebar !== 'false';
+        var showStatusbar = pre.dataset.statusbar !== 'false';
+        var showCopyButton = pre.dataset.copyButton !== 'false' && cfg.copyButton !== false;
 
         var codeArea = document.createElement('div');
         codeArea.className = 'lc-pw-code';
@@ -156,10 +169,10 @@
         codeArea.parentNode.insertBefore(block, codeArea);
         block.appendChild(codeArea);
 
-        if (pre.dataset.titlebar !== 'false') {
-            block.insertBefore(buildTitlebar(pre, code, displayLang), codeArea);
+        if (showTitlebar) {
+            block.insertBefore(buildTitlebar(pre, code, displayLang, showCopyButton), codeArea);
         }
-        if (pre.dataset.statusbar !== 'false') {
+        if (showStatusbar) {
             block.appendChild(buildStatusBar(displayLang));
         }
 
@@ -168,6 +181,8 @@
         var showLineNumbers = pre.dataset.lineNumbers === 'true' || (cfg.lineNumbers && pre.dataset.lineNumbers !== 'false');
         if (showLineNumbers) gutter = insertLineNumbers(block, codeArea, pre, code);
 
+        if (pre.dataset.highlight) applyLineHighlight(code, pre.dataset.highlight);
+
         var lineCount     = rawText.split('\n').length;
         var collapseAfter = pre.dataset.collapseAfter !== undefined
             ? parseInt(pre.dataset.collapseAfter, 10)
@@ -175,7 +190,6 @@
         var shouldCollapse = pre.dataset.collapse === 'true' ||
             (collapseAfter > 0 && lineCount > collapseAfter && pre.dataset.collapse !== 'false');
         if (shouldCollapse) applyCollapse(block, lineCount, collapseAfter);
-
 
         /* FIX: set gutter min-height = code column height AFTER layout.
          * offsetHeight only works after the element is in the live DOM,
@@ -223,7 +237,7 @@
     }
 
     /* ── Titlebar ────────────────────────────────────────────── */
-    function buildTitlebar(pre, code, lang) {
+    function buildTitlebar(pre, code, lang, showCopyButton) {
         var bar = document.createElement('div');
         bar.className = 'lc-pw-titlebar';
         var dots = document.createElement('div'); dots.className = 'lc-pw-dots'; dots.setAttribute('aria-hidden','true');
@@ -239,8 +253,7 @@
             if (isTitle) { var ind = document.createElement('span'); ind.className = 'lc-pw-dot-indicator'; centre.appendChild(ind); }
             var txt = document.createElement('span'); txt.textContent = ct; centre.appendChild(txt); bar.appendChild(centre);
         }
-        var showCopy = pre.dataset.copyButton !== 'false' && cfg.copyButton !== false;
-        if (showCopy) bar.appendChild(buildCopyBtn(code));
+        if (showCopyButton !== false) bar.appendChild(buildCopyBtn(code));
         return bar;
     }
 
