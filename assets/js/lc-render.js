@@ -95,52 +95,68 @@
         // Auto-detect existing headers or copy buttons in parent/ancestors to avoid double UI
         var parent = pre.parentElement;
         var limit = 4;
-        while (parent && limit > 0) {
-            // Find all matching elements and hide those that are NOT our own (not inside .lc-pw)
-            var headerEls = parent.querySelectorAll('[class*="header" i], [class*="titlebar" i], [class*="toolbar" i], [class*="dots" i]');
+        var isCustomWidget = false;
+
+        // Pass 1: Find and hide duplicate header/copy elements in the hierarchy
+        var currentParent = parent;
+        var currentLimit = limit;
+        while (currentParent && currentLimit > 0) {
+            var headerEls = currentParent.querySelectorAll('[class*="header" i], [class*="titlebar" i], [class*="toolbar" i], [class*="dots" i]');
             headerEls.forEach(function(el) {
                 if (el.closest('.lc-pw') || el.classList.contains('lc-pw') || el.classList.contains('lc-pw-titlebar') || el.classList.contains('lc-pw-dots') || el.classList.contains('lc-pw-dot')) {
                     return;
                 }
                 el.style.display = 'none';
+                isCustomWidget = true;
             });
 
-            var copyEls = parent.querySelectorAll('button[class*="copy" i], button[id*="copy" i], a[class*="copy" i], [class*="copy" i]:not(.lc-pw-copybtn), [onclick*="copy" i]');
+            var copyEls = currentParent.querySelectorAll('button[class*="copy" i], button[id*="copy" i], a[class*="copy" i], [class*="copy" i]:not(.lc-pw-copybtn), [onclick*="copy" i]');
             copyEls.forEach(function(el) {
                 if (el.closest('.lc-pw') || el.classList.contains('lc-pw-copybtn')) {
                     return;
                 }
                 el.style.display = 'none';
+                isCustomWidget = true;
             });
 
-            // Detect if this parent serves purely as a wrapper container for our code block.
-            // Ignore pre, elements that contain pre, hidden elements, and any wrapper structures created by our plugin.
-            if (parent.children) {
-                var otherChildren = Array.prototype.slice.call(parent.children).filter(function(child) {
-                    if (child === pre || child.contains(pre) || child.classList.contains('lc-pw') || child.classList.contains('lc-pw-code') || child.classList.contains('lc-pw-lined')) {
-                        return false;
-                    }
-                    if (child.style.display === 'none') {
-                        return false;
-                    }
-                    // If this child contains any header/copy element we just hid, ignore it
-                    var isHidden = false;
-                    headerEls.forEach(function(el) { if (el === child || child.contains(el)) isHidden = true; });
-                    copyEls.forEach(function(el) { if (el === child || child.contains(el)) isHidden = true; });
-                    if (isHidden) {
-                        return false;
-                    }
-                    return true;
-                });
+            currentParent = currentParent.parentElement;
+            currentLimit--;
+        }
 
-                // If no other visible elements exist, strip parent styles to avoid enveloping the plugin UI
-                if (otherChildren.length === 0) {
-                    parent.classList.add('lc-neutralized');
+        // Pass 2: Neutralize styling of wrapper containers only if this block is nested inside a custom widget
+        if (isCustomWidget) {
+            currentParent = parent;
+            currentLimit = limit;
+            while (currentParent && currentLimit > 0) {
+                if (currentParent.children) {
+                    var headerEls = currentParent.querySelectorAll('[class*="header" i], [class*="titlebar" i], [class*="toolbar" i], [class*="dots" i]');
+                    var copyEls = currentParent.querySelectorAll('button[class*="copy" i], button[id*="copy" i], a[class*="copy" i], [class*="copy" i]:not(.lc-pw-copybtn), [onclick*="copy" i]');
+
+                    var otherChildren = Array.prototype.slice.call(currentParent.children).filter(function(child) {
+                        if (child === pre || child.contains(pre) || child.classList.contains('lc-pw') || child.classList.contains('lc-pw-code') || child.classList.contains('lc-pw-lined')) {
+                            return false;
+                        }
+                        if (child.style.display === 'none') {
+                            return false;
+                        }
+                        // If this child contains any header/copy element we hid, ignore it
+                        var isHidden = false;
+                        headerEls.forEach(function(el) { if (el === child || child.contains(el)) isHidden = true; });
+                        copyEls.forEach(function(el) { if (el === child || child.contains(el)) isHidden = true; });
+                        if (isHidden) {
+                            return false;
+                        }
+                        return true;
+                    });
+
+                    // If no other visible elements exist, strip parent styles to avoid double border/mockup window envelope styling
+                    if (otherChildren.length === 0) {
+                        currentParent.classList.add('lc-neutralized');
+                    }
                 }
+                currentParent = currentParent.parentElement;
+                currentLimit--;
             }
-
-            parent = parent.parentElement;
-            limit--;
         }
 
         var disableChrome = pre.dataset.chrome === 'false' || pre.classList.contains('lc-no-chrome');
