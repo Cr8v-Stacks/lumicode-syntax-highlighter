@@ -628,6 +628,9 @@ kbd:not(pre kbd),
     height: auto !important;
     max-height: none !important;
     cursor: default !important;
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
 }
 .lc-neutralized::before,
 .lc-neutralized::after {
