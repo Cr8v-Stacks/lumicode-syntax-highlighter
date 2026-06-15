@@ -26,6 +26,7 @@ Beautiful syntax highlighting for WordPress. Auto-detects 40+ languages, with co
 * **Filename / language badge** - shows in the titlebar of every code box
 * **TinyMCE integration** - Insert Code Block button in the Classic Editor toolbar, with language detection and all options
 * **Gutenberg block** - native block editor support
+* **Elementor Widget** - drag-and-drop code blocks natively in the Elementor page builder
 * **Code Scanner** - scans your entire site for bare `<pre>` blocks and lets you apply LumiCode with one click, or dismiss
 * **Auto-detect** - wraps any existing `<pre>` blocks automatically on the frontend without touching your content
 

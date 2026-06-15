@@ -25,6 +25,7 @@ require_once LUMICODE_DIR . 'includes/class-lumicode-scanner.php';
 require_once LUMICODE_DIR . 'includes/class-lumicode-shortcode.php';
 require_once LUMICODE_DIR . 'includes/class-lumicode-block.php';
 require_once LUMICODE_DIR . 'includes/class-lumicode-tinymce.php';
+require_once LUMICODE_DIR . 'includes/class-lumicode-elementor.php';
 require_once LUMICODE_DIR . 'admin/class-lumicode-admin.php';
 
 register_activation_hook( __FILE__, 'lumicode_activate' );
