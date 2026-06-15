@@ -135,13 +135,7 @@
 
                 // If no other visible elements exist, strip parent styles to avoid enveloping the plugin UI
                 if (otherChildren.length === 0) {
-                    parent.style.setProperty('border', 'none', 'important');
-                    parent.style.setProperty('background', 'transparent', 'important');
-                    parent.style.setProperty('background-color', 'transparent', 'important');
-                    parent.style.setProperty('box-shadow', 'none', 'important');
-                    parent.style.setProperty('padding', '0', 'important');
-                    parent.style.setProperty('margin', '0', 'important');
-                    parent.style.setProperty('border-radius', '0', 'important');
+                    parent.classList.add('lc-neutralized');
                 }
             }
 

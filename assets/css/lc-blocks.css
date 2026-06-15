@@ -587,7 +587,6 @@ kbd:not(pre kbd),
 /* Red dot indicator, status bar items, and code highlights resets */
 .lc-pw-filename span,
 .lc-pw-statusbar span,
-.lc-pw-dots span,
 .lc-pw-line-numbers span {
     background: transparent !important;
     box-shadow: none !important;
@@ -600,6 +599,9 @@ kbd:not(pre kbd),
     float: none !important;
     position: static !important;
 }
+.lc-pw button.lc-pw-copybtn {
+    margin-left: auto !important;
+}
 .lc-pw-dots span.lc-pw-dot {
     border-radius: 50% !important;
     width: 12px !important;
@@ -610,4 +612,28 @@ kbd:not(pre kbd),
     width: 6px !important;
     height: 6px !important;
     background: #febc2e !important;
+}
+
+/* Broad-spectrum parent wrapper style and pseudo-element neutralization */
+.lc-neutralized {
+    border: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    cursor: default !important;
+}
+.lc-neutralized::before,
+.lc-neutralized::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    background-image: none !important;
+    opacity: 0 !important;
 }
