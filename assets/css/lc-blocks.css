@@ -526,13 +526,13 @@ kbd:not(pre kbd),
 }
 
 /* Reset code element inside pre from external theme overrides */
-.lc-pw-code pre.lumicode-pre code {
+.lc-pw-code pre.lumicode-pre code.hljs,
+.lc-pw-code pre.lumicode-pre code.hljs * {
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     outline: none !important;
     margin: 0 !important;
-    padding: 20px 24px !important;
     float: none !important;
     position: static !important;
     text-shadow: none !important;
@@ -540,20 +540,9 @@ kbd:not(pre kbd),
     width: auto !important;
     max-width: none !important;
 }
-.lc-pw-code pre.lumicode-pre code * {
+.lc-pw-code pre.lumicode-pre code.hljs * {
     background: transparent !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    outline: none !important;
-    margin: 0 !important;
     padding: 0 !important;
-    float: none !important;
-    position: static !important;
-    text-shadow: none !important;
-    height: auto !important;
-    width: auto !important;
-    max-width: none !important;
 }
 
 /* Force standard button reset to protect against themes styling all button elements */
