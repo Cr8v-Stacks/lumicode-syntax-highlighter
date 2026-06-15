@@ -2,11 +2,21 @@
 
 All notable changes to LumiCode Syntax Highlighter will be documented in this file.
 
+## 1.5.7 - 2026-06-15
+
+### Fixed
+
+- Fixed fake-chrome traversal regression: plain wrapper divs (e.g. `.arch`, layout containers) were being wrongly neutralized because the old algorithm stripped any parent that had no visible siblings alongside `<pre>`, regardless of whether that parent contained any fake chrome at all.
+- Containers are now **only** neutralized when they actually contain fake chrome: custom headers, titlebars, toolbars, or copy buttons that are not part of the LumiCode UI itself.
+- Intermediate child containers between the detected fake-chrome parent and the `<pre>` element (e.g. `.widget-code` inside `.widget-block`) are also neutralized, eliminating double-background and overflow CSS leaks from inner wrappers.
+- Removed `[class*="dots"]` from the header-detection selector to prevent false positives.
+- Traversal now stops as soon as the first fake-chrome container is found, preventing cascade neutralization of unrelated ancestors.
+
 ## 1.5.6 - 2026-05-18
+
 
 ### Added
 
-- Added native Elementor widget support allowing code blocks to be configured via the Elementor page builder.
 - Added automatic container detection that hides redundant headers and copy buttons, and neutralizes styling (margins, padding, background, border, shadow, radius) on any purely wrapping parent containers to prevent CSS leaks.
 
 ### Maintenance
