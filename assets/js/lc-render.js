@@ -1,5 +1,5 @@
 /**
- * LumiCode — Frontend Renderer v1.5.8
+ * LumiCode — Frontend Renderer v1.5.7
  * Cr8v Stacks · cr8vstacks.com
  *
  * KEY CHANGES:
@@ -9,13 +9,10 @@
  *   - Light mode modal: when topbar toggle is used, a modal asks
  *     if light mode should also apply to frontend code boxes.
  *     Frontend picks up the setting on next page load from DB.
- *   - v1.5.7: Fixed fake-chrome traversal: plain wrapper divs are no longer
- *     wrongly neutralized. Only containers with actual headers/copy buttons
- *     are neutralized. Traversal stops at first match.
- *   - v1.5.8: Two-pass container handling. Pass 1 finds fake chrome (custom
- *     headers/copy buttons) and neutralizes those containers plus intermediates.
- *     Pass 2 handles plain-wrapper divs (e.g. .arch-box) that contain only
- *     the <pre>: strips their background/padding so they don’t envelop our UI.
+ *   - v1.5.7: Two-pass container detection. Pass 1 finds fake chrome
+ *     (headers/copy buttons) and neutralizes those containers + intermediates.
+ *     Pass 2 neutralizes plain-only wrapper divs around the <pre>.
+ *     lc-neutralized CSS now only strips decoration, never layout properties.
  */
 (function () {
     'use strict';
