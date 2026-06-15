@@ -4,7 +4,7 @@ Donate link: https://cr8vstacks.com
 Tags: syntax highlighter, code block, highlight.js, code snippet, developer
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.5.7
+Stable tag: 1.5.8
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -113,6 +113,9 @@ PHP 8.0 or higher. WordPress 6.0 or higher.
 5. **TinyMCE dialog and scanner** - insert formatted code or find existing bare `<pre>` blocks
 
 == Changelog ==
+
+= 1.5.8 =
+* Feature: Added smart DOM auto-detection. The plugin now automatically detects if a code block is nested inside custom styled layouts (like widget blocks with existing copy buttons or headers) and silently disables duplicate mockup window controls.
 
 = 1.5.7 =
 * Feature: Support per-block overrides to disable/customize mockup window chrome (`data-chrome`, `data-titlebar`, `data-statusbar`, `data-copy-button`, `data-line-numbers` attributes or `lc-no-chrome` class).

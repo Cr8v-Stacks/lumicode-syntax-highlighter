@@ -96,6 +96,51 @@
         if (pre.dataset.highlight) applyLineHighlight(code, pre.dataset.highlight);
 
         var hasChrome = pre.dataset.chrome !== 'false' && !pre.classList.contains('lc-no-chrome');
+
+        // Auto-detect if block is already prestyled or wrapped in a custom layout
+        if (hasChrome) {
+            var container = pre.parentElement;
+            while (container && container !== document.body) {
+                var className = (container.className || '');
+                if (typeof className === 'string') {
+                    className = className.toLowerCase();
+                    if (className.indexOf('widget-block') !== -1 || 
+                        className.indexOf('widget-code') !== -1 || 
+                        className.indexOf('code-window') !== -1) {
+                        hasChrome = false;
+                        break;
+                    }
+                }
+
+                // Scan for existing copy buttons/links or header/title elements outside the pre
+                var hasExistingCopy = false;
+                var hasExistingHeader = false;
+                var children = container.children;
+                for (var i = 0; i < children.length; i++) {
+                    var child = children[i];
+                    if (child.contains(pre)) continue;
+
+                    var childText = (child.textContent || '').toLowerCase().trim();
+                    var childClass = (child.className || '');
+                    if (typeof childClass === 'string') childClass = childClass.toLowerCase();
+
+                    if (childClass.indexOf('copy') !== -1 || childText === 'copy' || childText === 'copied!') {
+                        hasExistingCopy = true;
+                    }
+                    if (childClass.indexOf('header') !== -1 || childClass.indexOf('title') !== -1 || childClass.indexOf('dots') !== -1) {
+                        hasExistingHeader = true;
+                    }
+                }
+
+                if (hasExistingCopy || hasExistingHeader) {
+                    hasChrome = false;
+                    break;
+                }
+
+                container = container.parentElement;
+            }
+        }
+
         if (!hasChrome) return;
 
         var displayLang = lang || getLangFromClass(code.className) || '';

@@ -2,6 +2,12 @@
 
 All notable changes to LumiCode Syntax Highlighter will be documented in this file.
 
+## 1.5.8 - 2026-06-15
+
+### Added
+
+- Smart DOM auto-detection: The plugin automatically scans parent containers of `<pre>` tags. If a block is nested inside custom layout wrappers containing pre-existing "Copy" buttons, headers, or decorative window dots (such as page builder widgets), the plugin's mockup window chrome is silently disabled to avoid visual conflicts.
+
 ## 1.5.7 - 2026-06-15
 
 ### Added
