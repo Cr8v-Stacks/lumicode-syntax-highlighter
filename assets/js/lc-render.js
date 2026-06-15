@@ -31,6 +31,7 @@
 
         injectStyle('lc-fonts',
             'pre.lumicode-pre,pre.lumicode-pre code,.lc-pw-code pre,.lc-pw-code pre code{font-family:' + ff + '!important;font-size:' + fs + '!important;line-height:1.5!important}' +
+            'pre.lumicode-pre code{border:none!important;padding:0!important;margin:0!important;box-shadow:none!important}' +
             '.lumicode-inline-code,.lumicode-inline-kbd,.lumicode-inline-samp,.lumicode-inline-var{font-family:' + ff + '!important}' +
             '.lc-pw-line-numbers{font-size:' + fs + '!important;line-height:1.5!important}' +
             '.lc-pw-line-numbers span{line-height:1.5!important}'
@@ -95,10 +96,11 @@
 
         var hasChrome = pre.dataset.chrome !== 'false' && !pre.classList.contains('lc-no-chrome');
 
-        // Auto-detect if block is already prestyled or wrapped in a custom layout
+        // Auto-detect if block is already prestyled or wrapped in a custom layout (check up to 2 levels)
         if (hasChrome) {
             var container = pre.parentElement;
-            while (container && container !== document.body) {
+            var depth = 0;
+            while (container && container !== document.body && depth < 2) {
                 var className = (container.className || '');
                 if (typeof className === 'string') {
                     className = className.toLowerCase();
@@ -136,6 +138,7 @@
                 }
 
                 container = container.parentElement;
+                depth++;
             }
         }
 
