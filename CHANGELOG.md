@@ -6,7 +6,7 @@ All notable changes to LumiCode Syntax Highlighter will be documented in this fi
 
 ### Added
 
-- Added automatic container detection that hides outer redundant header layouts and copy buttons to preserve the plugin's premium UI on custom widgets.
+- Added automatic container detection that neutralizes outer wrapper layout styling and hides redundant headers and copy buttons to preserve the plugin's premium UI on custom widgets.
 
 ### Maintenance
 

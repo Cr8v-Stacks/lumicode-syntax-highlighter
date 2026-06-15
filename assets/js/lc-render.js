@@ -98,14 +98,27 @@
         while (parent && limit > 0) {
             // Find any element styling like a header, toolbar, titlebar or dots that is NOT our own and hide it
             var headerEl = parent.querySelector('[class*="header" i], [class*="titlebar" i], [class*="toolbar" i], [class*="dots" i]');
+            var isCustomWidget = false;
             if (headerEl && !headerEl.closest('.lc-pw') && !headerEl.classList.contains('lc-pw') && !headerEl.classList.contains('lc-pw-titlebar') && !headerEl.classList.contains('lc-pw-dots') && !headerEl.classList.contains('lc-pw-dot')) {
                 headerEl.style.display = 'none';
+                isCustomWidget = true;
             }
 
             // Find any copy button/link containing "copy" that is NOT our own and hide it
             var copyEl = parent.querySelector('button[class*="copy" i], button[id*="copy" i], a[class*="copy" i], [class*="copy" i]:not(.lc-pw-copybtn), [onclick*="copy" i]');
             if (copyEl && !copyEl.closest('.lc-pw') && !copyEl.classList.contains('lc-pw-copybtn')) {
                 copyEl.style.display = 'none';
+                isCustomWidget = true;
+            }
+
+            // If we've detected this container acts as a custom code window mockup, strip its layout styles
+            // so they don't leak or double-envelop our plugin's UI box.
+            if (isCustomWidget || parent.classList.contains('widget-code') || parent.classList.contains('widget-block') || parent.className.indexOf('code') !== -1) {
+                parent.style.setProperty('border', 'none', 'important');
+                parent.style.setProperty('background', 'transparent', 'important');
+                parent.style.setProperty('box-shadow', 'none', 'important');
+                parent.style.setProperty('padding', '0', 'important');
+                parent.style.setProperty('margin', '0', 'important');
             }
 
             parent = parent.parentElement;

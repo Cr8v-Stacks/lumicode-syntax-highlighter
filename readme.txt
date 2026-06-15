@@ -111,7 +111,7 @@ PHP 8.0 or higher. WordPress 6.0 or higher.
 == Changelog ==
 
 = 1.5.6 =
-* Improvement: Automatically detect and hide redundant/outer container headers and copy buttons to prevent double-header mockup layouts on custom page builder widgets.
+* Improvement: Automatically detect and neutralize outer wrapper layout styling and hide redundant header/copy controls to prevent double-header mockup layouts on custom widget blocks.
 * Maintenance: Updated bundled highlight.js to v11.11.1 and kept assets served locally.
 * Maintenance: Refined bundled asset loading and shortcode behavior.
 * Maintenance: Refined code block handling across shortcode, scanner, block editor, and auto-enhance flows.
