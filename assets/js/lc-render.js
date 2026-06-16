@@ -91,7 +91,19 @@
             pre.innerHTML = ''; pre.appendChild(code);
         }
 
-        var rawText     = code.textContent;
+        // Capture raw text and immediately normalize it.
+        // WordPress/Elementor saves &nbsp; for blank lines/indentation; the browser
+        // decodes those to \u00a0 in textContent, which shows as invisible chars when pasted.
+        // We also strip zero-width chars and normalize line endings here, once, for everything
+        // that follows (highlight.js, data-lc-raw, and the copy handler).
+        var rawText = (code.textContent || '')
+            .replace(/\u00a0/g, ' ')   // non-breaking space → regular space
+            .replace(/\u200b/g, '')    // zero-width space → gone
+            .replace(/\u200c/g, '')    // zero-width non-joiner → gone
+            .replace(/\u200d/g, '')    // zero-width joiner → gone
+            .replace(/\ufeff/g, '')    // BOM → gone
+            .replace(/\r\n/g, '\n')    // Windows line endings → Unix
+            .replace(/\r/g, '\n');     // old Mac line endings → Unix
         var lang        = pre.dataset.lang || getLangFromClass(code.className) || '';
         runHljs(code, rawText, lang);
         var displayLang = lang || getLangFromClass(code.className) || '';
