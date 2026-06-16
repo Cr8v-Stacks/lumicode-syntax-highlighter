@@ -42,6 +42,40 @@
 
         enhanceInlineCode();
 
+        // Clean up manual copy/paste actions from our code blocks (e.g. via Ctrl+C / right-click)
+        document.addEventListener('copy', function (e) {
+            var sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            var range = sel.getRangeAt(0);
+            var container = range.commonAncestorContainer;
+            var isLumi = false;
+            var curr = container;
+            while (curr) {
+                if (curr.nodeType === 1 && (curr.classList.contains('lc-pw') || curr.classList.contains('lumicode-pre') || curr.classList.contains('lc-pw-code'))) {
+                    isLumi = true;
+                    break;
+                }
+                curr = curr.parentNode;
+            }
+            if (isLumi) {
+                var text = sel.toString();
+                if (text) {
+                    var cleaned = text
+                        .replace(/\u00a0/g, ' ')   // non-breaking space → regular space
+                        .replace(/\u200b/g, '')    // zero-width space → gone
+                        .replace(/\u200c/g, '')    // zero-width non-joiner → gone
+                        .replace(/\u200d/g, '')    // zero-width joiner → gone
+                        .replace(/\ufeff/g, '')    // BOM → gone
+                        .replace(/\r\n/g, '\n')    // Windows line endings → Unix
+                        .replace(/\r/g, '\n');     // old Mac line endings → Unix
+                    if (cleaned !== text) {
+                        e.clipboardData.setData('text/plain', cleaned);
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
+
         document.querySelectorAll('pre.lumicode-pre').forEach(function (pre) {
             if (pre.closest('.lc-pw')) return;
             enhanceBlock(pre);
