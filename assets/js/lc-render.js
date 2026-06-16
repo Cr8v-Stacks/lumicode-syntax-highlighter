@@ -271,6 +271,9 @@
     /* ── hljs ────────────────────────────────────────────────── */
     function runHljs(code, rawText, lang) {
         if (!window.hljs) return;
+        // Store the original raw text BEFORE highlight.js replaces innerHTML.
+        // buildCopyBtn reads this so the clipboard always gets clean, unmodified code.
+        code.dataset.lcRaw = rawText;
         var result;
         try {
             result = (lang && hljs.getLanguage(lang))
@@ -334,7 +337,9 @@
         btn.setAttribute('aria-label', cfg.i18n.copyLabel || 'Copy code');
         btn.textContent = cfg.i18n.copy || 'Copy';
         btn.addEventListener('click', function () {
-            var text = code.textContent || '';
+            // Prefer the original raw text stored before highlight.js ran.
+            // code.textContent after highlighting contains span-join artifacts.
+            var text = code.dataset.lcRaw !== undefined ? code.dataset.lcRaw : (code.textContent || '');
             function done() {
                 btn.textContent = cfg.i18n.copied || 'Copied!';
                 btn.style.color = '#28c840'; btn.style.borderColor = '#28c840';

@@ -13,6 +13,7 @@ All notable changes to LumiCode Syntax Highlighter will be documented in this fi
 - Removed `[class*="dots"]` from the header-detection selector to prevent false positives on our own `.lc-pw-dots` elements.
 - Traversal stops at the first fake-chrome match — no cascade neutralization of unrelated ancestors.
 - Fixed `lc-neutralized` CSS: removed `margin`, `height`, `min-height`, `max-height`, and `cursor` resets. These are structural/layout properties that broke Elementor columns and flex layouts. The class now only strips visual decoration (background, border, shadow, border-radius, padding, overflow).
+- Fixed copy button producing invisible/garbage characters on paste. The button was reading `code.textContent` after highlight.js had replaced the element's `innerHTML` with `<span>` tags — traversing those spans introduced zero-width joiners and other artifacts. The raw text is now stored on the element as `data-lc-raw` before highlight.js runs, and the copy handler reads that instead.
 
 ## 1.5.6 - 2026-05-18
 
