@@ -1,20 +1,20 @@
-﻿=== LumiCode Syntax Highlighter ===
+=== LumiCode Syntax Highlighter ===
 
 Contributors: Cr8v Stacks
 Donate link: https://cr8vstacks.com
 Tags: syntax highlighter, code block, highlight.js, code snippet, developer
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.5.6
+Stable tag: 1.5.7
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Beautiful syntax highlighting for WordPress. Auto-detects 40+ languages, with copy buttons, line numbers, collapse, and a dark/light theme switcher.
+Beautiful syntax highlighting for WordPress. Auto-detects 40+ languages, with copy buttons, line numbers, collapse, and a dark/light theme switcher. Live demo at https://cr8vstacks.com/dev-playground/lumicode-syntax-highlighter/
 
 == Description ==
 
-**LumiCode** is a premium-quality syntax highlighter built for developers and technical bloggers who want beautiful, readable code on their WordPress site - without fighting the editor.
+**LumiCode** is a premium-quality syntax highlighter built for developers and technical bloggers who want beautiful, readable code on their WordPress site - without fighting the editor. Learn more and view the live demo at https://cr8vstacks.com/dev-playground/lumicode-syntax-highlighter/
 
 ### Key Features
 
@@ -110,6 +110,12 @@ PHP 8.0 or higher. WordPress 6.0 or higher.
 5. **TinyMCE dialog and scanner** - insert formatted code or find existing bare `<pre>` blocks
 
 == Changelog ==
+
+= 1.5.7 =
+* Fix: Reworked container detection into a two-pass system to handle all wrapping scenarios generically.
+* Fix: Removed margin/height/cursor resets from lc-neutralized to prevent Elementor column and layout issues.
+* Fix: Resolved duplicate header/dots indicators for nested widgets and plain wrapper divs.
+* Fix: Corrected copy button and selection copying to normalize code text on the fly, preventing zero-width spaces/joiners and HTML non-breaking spaces (e.g. from Elementor) from generating invisible character artifacts.
 
 = 1.5.6 =
 * Maintenance: Updated bundled highlight.js to v11.11.1 and kept assets served locally.

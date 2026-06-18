@@ -9,11 +9,11 @@ Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Beautiful syntax highlighting for WordPress. Auto-detects 40+ languages, with copy buttons, line numbers, collapse, and a dark/light theme switcher.
+Beautiful syntax highlighting for WordPress. Auto-detects 40+ languages, with copy buttons, line numbers, collapse, and a dark/light theme switcher. Live demo at https://cr8vstacks.com/dev-playground/lumicode-syntax-highlighter/
 
 == Description ==
 
-**LumiCode** is a premium-quality syntax highlighter built for developers and technical bloggers who want beautiful, readable code on their WordPress site - without fighting the editor.
+**LumiCode** is a premium-quality syntax highlighter built for developers and technical bloggers who want beautiful, readable code on their WordPress site - without fighting the editor. Learn more and view the live demo at https://cr8vstacks.com/dev-playground/lumicode-syntax-highlighter/
 
 ### Key Features
 
