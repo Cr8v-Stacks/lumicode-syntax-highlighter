@@ -55,6 +55,8 @@ class LumiCode_Frontend {
                 'fontSize'      => (int) $s['font_size'],
                 'fontFamily'    => $s['font_family'],
                 'collapseAfter' => (int) $s['collapse_after'],
+                'maxWidth'      => $s['max_width'],
+                'lineWrap'      => (bool) $s['line_wrap'],
                 'i18n'          => [
                     'copy'      => __( 'Copy', 'lumicode-syntax-highlighter' ),
                     'copied'    => __( 'Copied!', 'lumicode-syntax-highlighter' ),

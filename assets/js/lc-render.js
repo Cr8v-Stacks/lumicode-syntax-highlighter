@@ -21,6 +21,42 @@
     var isLight  = !!cfg.isLight;
     var fontSize = parseFloat(cfg.fontSize) || 13;
 
+    var prettyNames = {
+        'javascript': 'JavaScript',
+        'typescript': 'TypeScript',
+        'js': 'JavaScript',
+        'ts': 'TypeScript',
+        'php': 'PHP',
+        'html': 'HTML',
+        'xml': 'HTML/XML',
+        'css': 'CSS',
+        'scss': 'SCSS',
+        'less': 'Less',
+        'sass': 'Sass',
+        'sql': 'SQL',
+        'yaml': 'YAML',
+        'yml': 'YAML',
+        'json': 'JSON',
+        'bash': 'Bash/Shell',
+        'sh': 'Bash/Shell',
+        'shell': 'Bash/Shell',
+        'python': 'Python',
+        'py': 'Python',
+        'rust': 'Rust',
+        'rs': 'Rust',
+        'cpp': 'C++',
+        'cplusplus': 'C++',
+        'csharp': 'C#',
+        'cs': 'C#',
+        'java': 'Java',
+        'go': 'Go',
+        'golang': 'Go',
+        'ruby': 'Ruby',
+        'rb': 'Ruby',
+        'markdown': 'Markdown',
+        'md': 'Markdown'
+    };
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', boot);
     } else {
@@ -241,14 +277,28 @@
 
                     var lined = document.createElement('div');
                     lined.className = 'lc-pw-lined';
+                    if (cfg.lineWrap) {
+                        lined.classList.add('lc-pw-wrap');
+                    }
                     codeArea.parentNode.insertBefore(lined, codeArea);
                     lined.appendChild(gutter);
                     lined.appendChild(codeArea);
 
                     requestAnimationFrame(function () {
+                        if (cfg.lineWrap) {
+                            syncLineHeights(lined);
+                        }
                         var h = codeArea.scrollHeight || codeArea.offsetHeight;
                         if (h > 0) gutter.style.minHeight = h + 'px';
                     });
+
+                    window.addEventListener('resize', function () {
+                        if (cfg.lineWrap) {
+                            syncLineHeights(lined);
+                        }
+                        var h2 = codeArea.scrollHeight || codeArea.offsetHeight;
+                        if (h2 > 0) gutter.style.minHeight = h2 + 'px';
+                    }, { passive: true });
                 }
             }
 
@@ -267,6 +317,14 @@
 
         var block = document.createElement('div');
         block.className = 'lc-pw' + (isLight ? ' lc-pw-is-light' : '');
+        if (cfg.lineWrap) {
+            block.className += ' lc-pw-wrap';
+        }
+        if (cfg.maxWidth) {
+            block.style.maxWidth = cfg.maxWidth;
+            block.style.marginLeft = 'auto';
+            block.style.marginRight = 'auto';
+        }
         codeArea.parentNode.insertBefore(block, codeArea);
         block.appendChild(codeArea);
 
@@ -299,6 +357,9 @@
             requestAnimationFrame(function () {
                 var lined = gutter.parentNode; /* .lc-pw-lined */
                 if (!lined) return;
+                if (cfg.lineWrap) {
+                    syncLineHeights(block);
+                }
                 var codeCol = lined.querySelector('.lc-pw-code');
                 if (codeCol) {
                     /* Use scrollHeight so we get full content height, not clipped height */
@@ -307,6 +368,9 @@
                 }
                 /* Also update after any window resize */
                 window.addEventListener('resize', function () {
+                    if (cfg.lineWrap) {
+                        syncLineHeights(block);
+                    }
                     var h2 = codeCol.scrollHeight || codeCol.offsetHeight;
                     if (h2 > 0) gutter.style.minHeight = h2 + 'px';
                 }, { passive: true });
@@ -324,7 +388,7 @@
         try {
             result = (lang && hljs.getLanguage(lang))
                 ? hljs.highlight(rawText, { language: lang, ignoreIllegals: true })
-                : hljs.highlightAuto(rawText);
+                : hljs.highlightAuto(rawText, ['javascript', 'typescript', 'css', 'html', 'xml', 'php', 'python', 'sql', 'bash', 'yaml', 'json', 'markdown', 'cpp', 'java', 'rust', 'go']);
             if (!lang && result.language) lang = result.language;
         } catch (e) { code.textContent = rawText; code.classList.add('hljs'); return; }
         code.innerHTML = result.value;
@@ -351,7 +415,7 @@
         bar.appendChild(dots);
         var ct = '', isTitle = false;
         if (pre.dataset.title) { ct = pre.dataset.title; isTitle = true; }
-        else if (cfg.languageBadge !== false && lang) { ct = lang; }
+        else if (cfg.languageBadge !== false && lang) { ct = prettyNames[lang.toLowerCase()] || (lang[0].toUpperCase() + lang.slice(1)); }
         if (ct) {
             var centre = document.createElement('div'); centre.className = 'lc-pw-filename';
             if (isTitle) { var ind = document.createElement('span'); ind.className = 'lc-pw-dot-indicator'; centre.appendChild(ind); }
@@ -371,7 +435,7 @@
         bar.appendChild(left);
         if (lang) {
             var r = document.createElement('div'); r.className = 'lc-pw-status-right';
-            r.textContent = lang[0].toUpperCase() + lang.slice(1); bar.appendChild(r);
+            r.textContent = prettyNames[lang.toLowerCase()] || (lang[0].toUpperCase() + lang.slice(1)); bar.appendChild(r);
         }
         return bar;
     }
@@ -487,6 +551,19 @@
         lined.appendChild(codeArea);
 
         return gutter; /* caller will set min-height after layout */
+    }
+
+    /* ── Gutter Sync ─────────────────────────────────────────── */
+    function syncLineHeights(block) {
+        var numGutter = block.querySelector('.lc-pw-line-numbers') || (block.classList.contains('lc-pw-line-numbers') ? block : null);
+        if (!numGutter) return;
+        var codeLines = block.querySelectorAll('.lc-pw-code .lc-pw-line');
+        var numSpans = numGutter.querySelectorAll('span');
+        if (codeLines.length === numSpans.length) {
+            for (var i = 0; i < codeLines.length; i++) {
+                numSpans[i].style.height = codeLines[i].getBoundingClientRect().height + 'px';
+            }
+        }
     }
 
     /* ── Per-line highlighting ───────────────────────────────── */

@@ -2,6 +2,13 @@
 
 All notable changes to LumiCode Syntax Highlighter will be documented in this file.
 
+## 1.5.8 - 2026-06-24
+
+### Added
+- Added **Max Width** setting to define a uniform maximum width (e.g. `800px`, `100%`) for all code blocks, centering them automatically when limited.
+- Added **Line Wrapping** setting to wrap long lines to the next line instead of using horizontal scrollbars, complete with layout-synced line numbers.
+- Improved automatic language detection accuracy by restricting highlight.js to a common developer language list, and pretty-mapping raw tags (e.g. `xml` -> `HTML/XML`, `javascript` -> `JavaScript`).
+
 ## 1.5.7 - 2026-06-15
 
 ### Fixed

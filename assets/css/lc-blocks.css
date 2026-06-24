@@ -218,6 +218,17 @@ kbd:not(pre kbd),
     text-shadow: none !important;
 }
 
+/* Overrides for line wrapping */
+.lc-pw-wrap .lc-pw-code pre code {
+    white-space: pre-wrap !important;
+    min-width: 0 !important;
+    word-break: break-word !important;
+    word-wrap: break-word !important;
+}
+.lc-pw-wrap .lc-pw-code {
+    overflow-x: hidden !important;
+}
+
 /* ── Status bar ──────────────────────────────────────────── */
 .lc-pw-statusbar {
     height: 30px !important;

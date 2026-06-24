@@ -18,6 +18,8 @@ class LumiCode_Settings {
             'font_family'    => 'JetBrains Mono, Fira Code, monospace',
             'auto_detect'    => true,
             'collapse_after' => 30,  // Auto-collapse blocks with more than N lines (0 = disabled)
+            'max_width'      => '',
+            'line_wrap'      => false,
         ];
         $settings = wp_parse_args( get_option( 'lumicode_settings', [] ), $defaults );
         if ( $key ) return $settings[ $key ] ?? null;
@@ -35,7 +37,7 @@ class LumiCode_Settings {
         $theme = sanitize_text_field( $input['theme'] ?? 'atom-one-dark' );
         $allowed = array_keys( self::available_themes() );
         $clean['theme']          = in_array( $theme, $allowed, true ) ? $theme : 'atom-one-dark';
-        $clean['light_mode']     = ! empty( $input['light_mode'] );   // ← was missing, caused toggle to not save
+        $clean['light_mode']     = ! empty( $input['light_mode'] );
         $clean['line_numbers']   = ! empty( $input['line_numbers'] );
         $clean['copy_button']    = ! empty( $input['copy_button'] );
         $clean['language_badge'] = ! empty( $input['language_badge'] );
@@ -43,6 +45,8 @@ class LumiCode_Settings {
         $clean['font_family']    = sanitize_text_field( $input['font_family'] ?? 'monospace' );
         $clean['auto_detect']    = ! empty( $input['auto_detect'] );
         $clean['collapse_after'] = absint( $input['collapse_after'] ?? 30 );
+        $clean['max_width']      = sanitize_text_field( $input['max_width'] ?? '' );
+        $clean['line_wrap']      = ! empty( $input['line_wrap'] );
         return $clean;
     }
 

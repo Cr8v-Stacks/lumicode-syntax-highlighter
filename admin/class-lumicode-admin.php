@@ -238,10 +238,19 @@ class LumiCode_Admin {
                                                 /* translators: %s: example font stack */
                                                 esc_html__( 'Comma-separated, e.g. %s', 'lumicode-syntax-highlighter' ),
                                                 '<code>JetBrains Mono, monospace</code>'
-                                            ),
+                                             ),
                                             [ 'code' => [] ]
                                         );
                                     ?></p>
+                                </div>
+
+                                <div class="lc-field">
+                                    <label class="lc-lbl" for="lc-maxwidth"><?php esc_html_e( 'Max Width', 'lumicode-syntax-highlighter' ); ?></label>
+                                    <input type="text" id="lc-maxwidth"
+                                        name="lumicode_settings[max_width]"
+                                        value="<?php echo esc_attr($s['max_width']); ?>"
+                                        placeholder="e.g. 100%, 800px, 60rem (optional)">
+                                    <p class="lc-hint"><?php esc_html_e( 'Enter a CSS max-width value, or leave empty for default width.', 'lumicode-syntax-highlighter' ); ?></p>
                                 </div>
                             </div>
 
@@ -253,6 +262,7 @@ class LumiCode_Admin {
                                     'line_numbers'   => [ esc_html__( 'Line Numbers', 'lumicode-syntax-highlighter' ),   esc_html__( 'Numbered gutter column on the left', 'lumicode-syntax-highlighter' ) ],
                                     'language_badge' => [ esc_html__( 'Language Badge', 'lumicode-syntax-highlighter' ), esc_html__( 'Shows detected language in the header bar', 'lumicode-syntax-highlighter' ) ],
                                     'auto_detect'    => [ esc_html__( 'Auto-Enhance', 'lumicode-syntax-highlighter' ),   esc_html__( 'Wrap bare &lt;pre&gt; tags sitewide', 'lumicode-syntax-highlighter' ) ],
+                                    'line_wrap'      => [ esc_html__( 'Line Wrapping', 'lumicode-syntax-highlighter' ),   esc_html__( 'Wrap long code lines to the next line instead of horizontal scrolling', 'lumicode-syntax-highlighter' ) ],
                                 ];
                                 foreach ( $features as $key => [ $name, $desc ] ) :
                                     $on = ! empty( $s[ $key ] );
