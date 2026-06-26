@@ -19,7 +19,7 @@
 
     var cfg      = window.LumiCode || {};
     var isLight  = !!cfg.isLight;
-    var fontSize = parseFloat(cfg.fontSize) || 13;
+    var fontSize = parseFloat(cfg.fontSize) || 12;
 
     var prettyNames = {
         'javascript': 'JavaScript',
@@ -54,7 +54,9 @@
         'ruby': 'Ruby',
         'rb': 'Ruby',
         'markdown': 'Markdown',
-        'md': 'Markdown'
+        'md': 'Markdown',
+        'plaintext': 'Text',
+        'text': 'Text'
     };
 
     if (document.readyState === 'loading') {
@@ -70,10 +72,22 @@
         document.documentElement.classList.toggle('lumicode-is-light', isLight);
 
         injectStyle('lc-fonts',
-            'pre.lumicode-pre,pre.lumicode-pre code,.lc-pw-code pre,.lc-pw-code pre code{font-family:' + ff + '!important;font-size:' + fs + '!important}' +
-            '.lumicode-inline-code,.lumicode-inline-kbd,.lumicode-inline-samp,.lumicode-inline-var{font-family:' + ff + '!important}' +
-            '.lc-pw-line-numbers{font-size:' + fs + '!important;line-height:1.5!important}' +
-            '.lc-pw-line-numbers span{line-height:1.5!important}'
+            'pre.lumicode-pre, pre.lumicode-pre code, .lc-pw-code pre, .lc-pw-code pre code, .lc-pw-code pre.lumicode-pre code * {' +
+                'font-family: ' + ff + ' !important;' +
+                'font-size: ' + fs + ' !important;' +
+                'font-weight: 400 !important;' +
+                'line-height: 1.2 !important;' +
+            '}' +
+            '.lumicode-inline-code, .lumicode-inline-kbd, .lumicode-inline-samp, .lumicode-inline-var {' +
+                'font-family: ' + ff + ' !important;' +
+            '}' +
+            '.lc-pw-line-numbers {' +
+                'font-size: ' + fs + ' !important;' +
+                'line-height: 1.2 !important;' +
+            '}' +
+            '.lc-pw-line-numbers span {' +
+                'line-height: 1.2 !important;' +
+            '}'
         );
 
         enhanceInlineCode();
@@ -256,7 +270,7 @@
             var showLineNumbers = pre.dataset.lineNumbers === 'true';
             var hasHighlight = !!pre.dataset.highlight;
             if (showLineNumbers || hasHighlight) {
-                var lines = code.innerHTML.split('\n');
+                var lines = splitHtmlIntoLines(code.innerHTML);
                 if (lines[lines.length - 1] === '') lines.pop();
                 code.innerHTML = lines.map(function (l) {
                     return '<span class="lc-pw-line">' + (l || '\u200b') + '</span>';
@@ -320,11 +334,10 @@
         if (cfg.lineWrap) {
             block.className += ' lc-pw-wrap';
         }
-        if (cfg.maxWidth) {
-            block.style.maxWidth = cfg.maxWidth;
-            block.style.marginLeft = 'auto';
-            block.style.marginRight = 'auto';
-        }
+        var mw = cfg.maxWidth || '1200px';
+        block.style.maxWidth = mw;
+        block.style.marginLeft = 'auto';
+        block.style.marginRight = 'auto';
         codeArea.parentNode.insertBefore(block, codeArea);
         block.appendChild(codeArea);
 
@@ -381,21 +394,67 @@
     /* ── hljs ────────────────────────────────────────────────── */
     function runHljs(code, rawText, lang) {
         if (!window.hljs) return;
-        // Store the original raw text BEFORE highlight.js replaces innerHTML.
-        // buildCopyBtn reads this so the clipboard always gets clean, unmodified code.
         code.dataset.lcRaw = rawText;
         var result;
+        var detectedLang = lang;
+
+        // Apply heuristics to force plaintext/Text on diagram/box-drawing layouts or weak matches
+        if (!detectedLang) {
+            // Check for box-drawing tree characters: └ ├ │
+            var hasBoxDrawing = /[│├└]/.test(rawText);
+            if (hasBoxDrawing) {
+                detectedLang = 'plaintext';
+            }
+        }
+
         try {
-            result = (lang && hljs.getLanguage(lang))
-                ? hljs.highlight(rawText, { language: lang, ignoreIllegals: true })
-                : hljs.highlightAuto(rawText, ['javascript', 'typescript', 'css', 'html', 'xml', 'php', 'python', 'sql', 'bash', 'yaml', 'json', 'markdown', 'cpp', 'java', 'rust', 'go']);
-            if (!lang && result.language) lang = result.language;
-        } catch (e) { code.textContent = rawText; code.classList.add('hljs'); return; }
+            if (detectedLang && detectedLang !== 'plaintext' && hljs.getLanguage(detectedLang)) {
+                result = hljs.highlight(rawText, { language: detectedLang, ignoreIllegals: true });
+            } else if (detectedLang === 'plaintext') {
+                result = { value: escapeHtml(rawText), language: 'plaintext', relevance: 0 };
+            } else {
+                result = hljs.highlightAuto(rawText, ['javascript', 'typescript', 'css', 'html', 'xml', 'php', 'python', 'sql', 'bash', 'yaml', 'json', 'markdown', 'cpp', 'java', 'rust', 'go']);
+                var autodetected = result.language || '';
+
+                // Sanity check SQL: keywords must exist, otherwise fall back to plaintext
+                if (autodetected === 'sql') {
+                    var sqlKeywords = /\b(select|insert|update|delete|create|drop|alter|table|from|where|join|database|index|into|values)\b/i;
+                    if (!sqlKeywords.test(rawText)) {
+                        autodetected = 'plaintext';
+                    }
+                }
+
+                // Fall back to plaintext if relevance score is very low (less than 4)
+                if (autodetected !== 'plaintext' && result.relevance < 4) {
+                    autodetected = 'plaintext';
+                }
+
+                if (autodetected === 'plaintext') {
+                    result = { value: escapeHtml(rawText), language: 'plaintext', relevance: 0 };
+                }
+                detectedLang = autodetected;
+            }
+        } catch (e) {
+            code.textContent = rawText;
+            code.classList.add('hljs');
+            return;
+        }
+
         code.innerHTML = result.value;
         code.classList.add('hljs');
-        if (lang) code.classList.add('language-' + lang);
-        else if (result && result.language) code.classList.add('language-' + result.language);
+        if (detectedLang) {
+            code.classList.add('language-' + detectedLang);
+        }
         code.dataset.highlighted = 'yes';
+    }
+
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
     function getLangFromClass(cls) {
@@ -532,7 +591,7 @@
 
     /* ── Line numbers — returns gutter element ───────────────── */
     function insertLineNumbers(block, codeArea, pre, code) {
-        var lines = code.innerHTML.split('\n');
+        var lines = splitHtmlIntoLines(code.innerHTML);
         if (lines[lines.length - 1] === '') lines.pop();
         code.innerHTML = lines.map(function (l) {
             return '<span class="lc-pw-line">' + (l || '\u200b') + '</span>';
@@ -551,6 +610,58 @@
         lined.appendChild(codeArea);
 
         return gutter; /* caller will set min-height after layout */
+    }
+
+    /* ── Tag-safe HTML newline splitter ──────────────────────── */
+    function splitHtmlIntoLines(html) {
+        var lines = [];
+        var currentLine = '';
+        var stack = [];
+        var i = 0;
+        while (i < html.length) {
+            if (html.charAt(i) === '<') {
+                var end = html.indexOf('>', i);
+                if (end === -1) {
+                    currentLine += html.substring(i);
+                    break;
+                }
+                var tag = html.substring(i, end + 1);
+                currentLine += tag;
+
+                if (tag.indexOf('</') === 0) {
+                    stack.pop();
+                } else if (tag.indexOf('/>') === -1) {
+                    var match = tag.match(/^<([a-z0-9-]+)/i);
+                    var tagName = match ? match[1].toLowerCase() : '';
+                    var selfClosing = /^(?:br|hr|img|input|meta|link)$/.test(tagName);
+                    if (tagName && !selfClosing) {
+                        stack.push(tag);
+                    }
+                }
+                i = end + 1;
+            } else if (html.charAt(i) === '\n') {
+                var closeTags = '';
+                for (var j = stack.length - 1; j >= 0; j--) {
+                    var m = stack[j].match(/^<([a-z0-9-]+)/i);
+                    var tName = m ? m[1] : 'span';
+                    closeTags += '</' + tName + '>';
+                }
+                currentLine += closeTags;
+                lines.push(currentLine);
+
+                var openTags = '';
+                for (var j = 0; j < stack.length; j++) {
+                    openTags += stack[j];
+                }
+                currentLine = openTags;
+                i++;
+            } else {
+                currentLine += html.charAt(i);
+                i++;
+            }
+        }
+        lines.push(currentLine);
+        return lines;
     }
 
     /* ── Gutter Sync ─────────────────────────────────────────── */

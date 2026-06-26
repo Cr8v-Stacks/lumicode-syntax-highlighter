@@ -5,7 +5,7 @@ Donate link: https://cr8vstacks.com
 Tags: syntax highlighter, code block, highlight.js, code snippet, developer
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.5.8
+Stable tag: 1.5.8.1
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -111,7 +111,7 @@ PHP 8.0 or higher. WordPress 6.0 or higher.
 
 == Changelog ==
 
-= 1.5.8 =
+= 1.5.8.1 =
 * Added: Max Width settings option to center and set uniform code block widths.
 * Added: Line Wrapping option with layout-synchronized line numbers to wrap code on edge boundaries instead of scrolling.
 * Improved: Auto-detected language badges map to human-readable names and restricted highlight.js auto-detection list for more accurate detection.

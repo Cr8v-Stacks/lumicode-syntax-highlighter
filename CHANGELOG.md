@@ -2,7 +2,7 @@
 
 All notable changes to LumiCode Syntax Highlighter will be documented in this file.
 
-## 1.5.8 - 2026-06-24
+## 1.5.8.1 - 2026-06-24
 
 ### Added
 - Added **Max Width** setting to define a uniform maximum width (e.g. `800px`, `100%`) for all code blocks, centering them automatically when limited.

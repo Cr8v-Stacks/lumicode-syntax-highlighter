@@ -64,7 +64,8 @@ kbd:not(pre kbd),
 
 .lc-pw {
     position: relative;
-    margin: 1.8em 0 3.8em 0;
+    margin: 1.8em auto 3.8em auto;
+    max-width: 1200px;
     border-radius: 10px;
     overflow: hidden;
     border: 1px solid #2a2d3a;

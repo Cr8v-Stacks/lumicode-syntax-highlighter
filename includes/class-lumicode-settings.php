@@ -14,11 +14,11 @@ class LumiCode_Settings {
             'line_numbers'   => true,
             'copy_button'    => true,
             'language_badge' => true,
-            'font_size'      => '14',
+            'font_size'      => '12',
             'font_family'    => 'JetBrains Mono, Fira Code, monospace',
             'auto_detect'    => true,
             'collapse_after' => 30,  // Auto-collapse blocks with more than N lines (0 = disabled)
-            'max_width'      => '',
+            'max_width'      => '1200px',
             'line_wrap'      => false,
         ];
         $settings = wp_parse_args( get_option( 'lumicode_settings', [] ), $defaults );
