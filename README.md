@@ -5,7 +5,7 @@ Donate link: https://cr8vstacks.com
 Tags: syntax highlighter, code block, highlight.js, code snippet, developer
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.5.8.1
+Stable tag: 1.5.9
 Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -110,6 +110,10 @@ PHP 8.0 or higher. WordPress 6.0 or higher.
 5. **TinyMCE dialog and scanner** - insert formatted code or find existing bare `<pre>` blocks
 
 == Changelog ==
+
+= 1.5.9 =
+* Fixed: line numbers now reach the bottom of the code box, including with line wrapping on.
+* Fixed: the code highlighter no longer strips padding from the theme article column.
 
 = 1.5.8.1 =
 * Added: Max Width settings option to center and set uniform code block widths.

@@ -202,6 +202,8 @@
             var limit = 3;
 
             while (ancestor && limit > 0) {
+                // Never climb into the page's own layout (article column, grid, builder canvas).
+                if (ancestor.matches && ancestor.matches('article, main, .entry-content, .post-content, .art-body-text, .art-content-col, .elementor, body')) break;
                 var hiddenHeaders = [];
                 var hiddenCopy   = [];
 
@@ -274,7 +276,7 @@
                 if (lines[lines.length - 1] === '') lines.pop();
                 code.innerHTML = lines.map(function (l) {
                     return '<span class="lc-pw-line">' + (l || '\u200b') + '</span>';
-                }).join('\n');
+                }).join('');  /* lines are display:block; a newline between them adds a blank line box and pushes the line numbers out of step */
 
                 if (showLineNumbers) {
                     var gutter = document.createElement('div');
@@ -298,21 +300,7 @@
                     lined.appendChild(gutter);
                     lined.appendChild(codeArea);
 
-                    requestAnimationFrame(function () {
-                        if (cfg.lineWrap) {
-                            syncLineHeights(lined);
-                        }
-                        var h = codeArea.scrollHeight || codeArea.offsetHeight;
-                        if (h > 0) gutter.style.minHeight = h + 'px';
-                    });
-
-                    window.addEventListener('resize', function () {
-                        if (cfg.lineWrap) {
-                            syncLineHeights(lined);
-                        }
-                        var h2 = codeArea.scrollHeight || codeArea.offsetHeight;
-                        if (h2 > 0) gutter.style.minHeight = h2 + 'px';
-                    }, { passive: true });
+                    watchGutter(lined, gutter, codeArea);
                 }
             }
 
@@ -367,27 +355,8 @@
          * offsetHeight only works after the element is in the live DOM,
          * so we use requestAnimationFrame to let the browser do one layout pass. */
         if (gutter) {
-            requestAnimationFrame(function () {
-                var lined = gutter.parentNode; /* .lc-pw-lined */
-                if (!lined) return;
-                if (cfg.lineWrap) {
-                    syncLineHeights(block);
-                }
-                var codeCol = lined.querySelector('.lc-pw-code');
-                if (codeCol) {
-                    /* Use scrollHeight so we get full content height, not clipped height */
-                    var h = codeCol.scrollHeight || codeCol.offsetHeight;
-                    if (h > 0) gutter.style.minHeight = h + 'px';
-                }
-                /* Also update after any window resize */
-                window.addEventListener('resize', function () {
-                    if (cfg.lineWrap) {
-                        syncLineHeights(block);
-                    }
-                    var h2 = codeCol.scrollHeight || codeCol.offsetHeight;
-                    if (h2 > 0) gutter.style.minHeight = h2 + 'px';
-                }, { passive: true });
-            });
+            var codeColForGutter = block.querySelector('.lc-pw-lined .lc-pw-code') || block.querySelector('.lc-pw-code');
+            if (codeColForGutter) watchGutter(block, gutter, codeColForGutter);
         }
     }
 
@@ -595,7 +564,7 @@
         if (lines[lines.length - 1] === '') lines.pop();
         code.innerHTML = lines.map(function (l) {
             return '<span class="lc-pw-line">' + (l || '\u200b') + '</span>';
-        }).join('\n');
+        }).join('');  /* lines are display:block; a newline between them adds a blank line box and pushes the line numbers out of step */
 
         var gutter = document.createElement('div');
         gutter.className = 'lc-pw-line-numbers';
@@ -670,11 +639,30 @@
         if (!numGutter) return;
         var codeLines = block.querySelectorAll('.lc-pw-code .lc-pw-line');
         var numSpans = numGutter.querySelectorAll('span');
-        if (codeLines.length === numSpans.length) {
-            for (var i = 0; i < codeLines.length; i++) {
-                numSpans[i].style.height = codeLines[i].getBoundingClientRect().height + 'px';
-            }
+        if (codeLines.length !== numSpans.length) return;
+        // Read every height first, then write, so one layout pass serves all lines.
+        var heights = [];
+        for (var i = 0; i < codeLines.length; i++) heights.push(codeLines[i].getBoundingClientRect().height);
+        for (var k = 0; k < numSpans.length; k++) {
+            if (heights[k] > 0) numSpans[k].style.setProperty('height', heights[k] + 'px', 'important');
         }
+    }
+
+    /* Keep the gutter in step with the code whenever the code area changes size (wrapping changes with the width,
+       fonts load late, a block expands). One observer per block, shared by every trigger. */
+    function watchGutter(block, gutter, codeArea) {
+        var pending = false;
+        function run() {
+            pending = false;
+            if (cfg.lineWrap) syncLineHeights(block);
+            var h = codeArea.scrollHeight || codeArea.offsetHeight;
+            if (h > 0) gutter.style.minHeight = h + 'px';
+        }
+        function queue() { if (!pending) { pending = true; requestAnimationFrame(run); } }
+        if (window.ResizeObserver) new ResizeObserver(queue).observe(codeArea);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(queue);
+        window.addEventListener('resize', queue, { passive: true });
+        queue();
     }
 
     /* ── Per-line highlighting ───────────────────────────────── */

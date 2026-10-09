@@ -2,6 +2,12 @@
 
 All notable changes to LumiCode Syntax Highlighter will be documented in this file.
 
+## 1.5.9
+
+- Fixed: line numbers stopped short of the bottom of the code box. The newline kept between lines added a blank line box to every line, so the numbers drifted out of step. Lines are now joined without it.
+- Fixed: with line wrapping on, number heights were set without !important, so the stylesheet overrode them and wrapped lines were not matched. Heights now apply, and re-sync when the box is resized, fonts load or a block expands.
+- Fixed: the fake-chrome detector climbed into the theme's article column and stripped its padding, hiding header-like parts of the page. It now stops at the post content container.
+
 ## 1.5.8.1 - 2026-06-24
 
 ### Added
