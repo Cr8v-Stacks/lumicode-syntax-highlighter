@@ -1,0 +1,23 @@
+name: Release to WordPress.org
+
+# Push a version tag (for example 1.5.9) and this publishes that version to the WordPress.org plugin directory.
+# One-time set-up in GitHub: Settings > Secrets and variables > Actions > New repository secret
+#   SVN_USERNAME  your wordpress.org username
+#   SVN_PASSWORD  your wordpress.org password (or an SVN password)
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  deploy:
+    name: Deploy tag to WordPress.org
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: WordPress plugin deploy
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: lumicode-syntax-highlighter
