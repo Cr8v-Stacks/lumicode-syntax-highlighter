@@ -9,7 +9,7 @@ Requires PHP: 8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Beautiful syntax highlighting for WordPress. Auto-detects 40+ languages, with copy buttons, line numbers, collapse, and a dark/light theme switcher. Live demo at https://cr8vstacks.com/dev-playground/lumicode-syntax-highlighter/
+Beautiful syntax highlighting for WordPress: 40+ languages, copy buttons, line numbers, line wrapping, collapse and a dark or light theme.
 
 == Description ==
 
